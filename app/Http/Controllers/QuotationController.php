@@ -10,37 +10,63 @@ class QuotationController extends Controller
     // List all quotations
     public function index()
     {
-        return response()->json(Quotation::all());
+        return response()->json([
+            'status' => 200,
+            'quotations' => Quotation::all()
+        ]);
     }
 
     // Store a new quotation
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'customer_id'        => 'required|integer|exists:tms_customer,cus_id',
-            'quotation_no'       => 'nullable|string|max:255',
-            'quotation_date'     => 'nullable|date',
-            'origin'             => 'nullable|string|max:255',
-            'destination'        => 'nullable|string|max:255',
-            'vehicle_type'       => 'nullable|string|max:255',
-            'rate'               => 'nullable|numeric',
-            'rate_type'          => 'nullable|string|max:255',
-            'estimated_distance' => 'nullable|numeric',
-            'estimated_time'     => 'nullable|numeric',
-            'remarks'            => 'nullable|string',
-            'status'             => 'nullable|string|max:255',
-        ]);
-        $quotation = Quotation::create($validated);
-        $quotation->quotation_no = 'Q-' . str_pad($quotation->id, 6, '0', STR_PAD_LEFT);
-        $quotation->save();
-        return response()->json($quotation, 201);
+        try {
+            // If customer_id is empty or not set, default to 1
+            $input = $request->all();
+            if (empty($input['customer_id'])) {
+                $input['customer_id'] = 1;
+            }
+
+            $validated = validator($input, [
+                'customer_id'        => 'required|integer|exists:tms_customer,cus_id',
+                'quotation_no'       => 'nullable|string|max:255',
+                'quotation_date'     => 'nullable|date',
+                'origin'             => 'nullable|string|max:255',
+                'destination'        => 'nullable|string|max:255',
+                'vehicle_type'       => 'nullable|string|max:255',
+                'rate'               => 'nullable|numeric',
+                'rate_type'          => 'nullable|string|max:255',
+                'estimated_distance' => 'nullable|numeric',
+                'estimated_time'     => 'nullable|numeric',
+                'remarks'            => 'nullable|string',
+                'status'             => 'nullable|string|max:255',
+            ])->validate();
+
+            $quotation = Quotation::create($validated);
+            $quotation->quotation_no = 'Q-' . str_pad($quotation->id, 6, '0', STR_PAD_LEFT);
+            $quotation->save();
+
+            return response()->json([
+                'message' => 'Quotation created successfully',
+                'status' => 201,
+                'quotation' => $quotation
+            ], 201);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'message' => 'Validation failed',
+                'errors' => $e->errors(),
+                'status' => 422
+            ], 422);
+        }
     }
 
     // Show a single quotation
     public function show($id)
     {
         $quotation = Quotation::findOrFail($id);
-        return response()->json($quotation);
+        return response()->json([
+            'status' => 200,
+            'quotation' => $quotation
+        ]);
     }
 
     // Update a quotation
@@ -64,7 +90,11 @@ class QuotationController extends Controller
         ]);
 
         $quotation->update($validated);
-        return response()->json($quotation);
+        return response()->json([
+            'message' => 'Quotation updated successfully',
+            'status' => 200,
+            'quotation' => $quotation
+        ]);
     }
 
     // Delete a quotation
@@ -72,6 +102,9 @@ class QuotationController extends Controller
     {
         $quotation = Quotation::findOrFail($id);
         $quotation->delete();
-       return response()->json(['message' => 'Quotation deleted successfully']);
+        return response()->json([
+            'message' => 'Quotation deleted successfully',
+            'status' => 200
+        ]);
     }
 }
