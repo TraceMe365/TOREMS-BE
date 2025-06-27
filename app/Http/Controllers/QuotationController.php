@@ -27,18 +27,22 @@ class QuotationController extends Controller
             }
 
             $validated = validator($input, [
-                'customer_id'        => 'required|integer|exists:tms_customer,cus_id',
-                'quotation_no'       => 'nullable|string|max:255',
-                'quotation_date'     => 'nullable|date',
-                'origin'             => 'nullable|string|max:255',
-                'destination'        => 'nullable|string|max:255',
-                'vehicle_type'       => 'nullable|string|max:255',
-                'rate'               => 'nullable|numeric',
-                'rate_type'          => 'nullable|string|max:255',
-                'estimated_distance' => 'nullable|numeric',
-                'estimated_time'     => 'nullable|numeric',
-                'remarks'            => 'nullable|string',
-                'status'             => 'nullable|string|max:255',
+                'customer_id'           => 'required|integer|exists:tms_customer,cus_id',
+                'quotation_no'          => 'nullable|string|max:255',
+                'quotation_date'        => 'nullable|date',
+                'origin_name'           => 'required|string|max:255',
+                'origin_latitude'       => 'required|numeric',
+                'origin_longitude'      => 'required|numeric',
+                'destination_name'      => 'required|string|max:255',
+                'destination_latitude'  => 'required|numeric',
+                'destination_longitude' => 'required|numeric',
+                'vehicle_type'          => 'nullable|string|max:255',
+                'rate'                  => 'nullable|numeric',
+                'rate_type'             => 'nullable|string|max:255',
+                'estimated_distance'    => 'nullable|numeric',
+                'estimated_time'        => 'nullable|numeric',
+                'remarks'               => 'nullable|string',
+                'status'                => 'nullable|string|max:255',
             ])->validate();
 
             $quotation = Quotation::create($validated);

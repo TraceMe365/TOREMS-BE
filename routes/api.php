@@ -11,4 +11,6 @@ Route::post('/login', [JWTAuthController::class, 'login']);
 Route::get('/user', [JWTAuthController::class, 'getUser']);
 Route::post('/logout', [JWTAuthController::class, 'logout']);
 
-Route::post('/quotations/create', [QuotationController::class, 'store']);
+Route::apiResource('quotations', QuotationController::class)
+    ->middleware('jwt.auth')
+    ->only(['index', 'store', 'show', 'update', 'destroy']);
