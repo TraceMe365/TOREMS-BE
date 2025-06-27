@@ -18,7 +18,6 @@ class VehicleType extends Model
         'tms_com_id',
         'tms_cus_id',
         'veh_capacity',
-        'veh_id', // Foreign key to tms_vehicle
     ];
 
     public function vehicle()
