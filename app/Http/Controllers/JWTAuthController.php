@@ -38,9 +38,10 @@ class JWTAuthController extends Controller
             'status'     => $request->get('status'),    
         ]);
 
-        $token = JWTAuth::fromUser($user);
-
-        return response()->json(compact('user','token'), 201);
+        return response()->json([
+            'message' => 'Succesfully created user, please await administrator approval',
+            'user' => $user,
+        ], 201);
     }
 
     // User login
@@ -59,7 +60,7 @@ class JWTAuthController extends Controller
             // (optional) Attach the role to the token.
             $token = JWTAuth::claims(['role' => $user->role])->fromUser($user);
 
-            return response()->json(array("access_token"=>$token,"token_type"=>"Bearer"));
+            return response()->json(array("access_token"=>$token,"token_type"=>"Bearer","user"=>$user), 200);
         } catch (JWTException $e) {
             return response()->json(['error' => 'Could not create token'], 500);
         }
