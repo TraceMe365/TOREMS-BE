@@ -17,6 +17,8 @@ class Employee extends Model
         'emp_f_name',
         'emp_s_name',
         'emp_address',
+        'current_latitude',
+        'current_longitude',
         'emp_id_card',
         'emp_licence_card',
         'emp_mobile',
