@@ -12,7 +12,32 @@ class QuotationController extends Controller
     {
         return response()->json([
             'status' => 200,
-            'quotations' => Quotation::all()
+            'quotations' => Quotation::with('vehicleType')->get()
+        ]);
+    }
+
+    public function approve(Request $request, $id)
+    {
+        $user = auth()->user();
+        // Only admin can approve the quotation
+        if (!$user || !in_array($user->role, ['admin', 'customer'])) {
+            return response()->json([
+                'message' => 'Unauthorized',
+                'status' => 403,
+                'role' => $user->role,
+            ], 403);
+        }
+
+        $quotation = Quotation::findOrFail($id);
+        $quotation->status = 'APPROVED';
+        $quotation->approve_user_id = $user->id;
+        $quotation->approve_time = now();
+        $quotation->save();
+
+        return response()->json([
+            'message' => 'Quotation approved successfully',
+            'status' => 200,
+            'quotation' => $quotation
         ]);
     }
 
@@ -30,13 +55,13 @@ class QuotationController extends Controller
                 'customer_id'           => 'required|integer|exists:tms_customer,cus_id',
                 'quotation_no'          => 'nullable|string|max:255',
                 'quotation_date'        => 'nullable|date',
-                'origin_name'           => 'required|string|max:255',
+                'origin'           => 'required|string|max:255',
                 'origin_latitude'       => 'required|numeric',
                 'origin_longitude'      => 'required|numeric',
-                'destination_name'      => 'required|string|max:255',
+                'destination'      => 'required|string|max:255',
                 'destination_latitude'  => 'required|numeric',
                 'destination_longitude' => 'required|numeric',
-                'vehicle_type'          => 'nullable|string|max:255',
+                'vehicle_type'          => 'nullable|int',
                 'rate'                  => 'nullable|numeric',
                 'rate_type'             => 'nullable|string|max:255',
                 'estimated_distance'    => 'nullable|numeric',
@@ -75,30 +100,39 @@ class QuotationController extends Controller
 
     // Update a quotation
     public function update(Request $request, $id)
-    {
-        $quotation = Quotation::findOrFail($id);
+    { 
+        try {
+            $quotation = Quotation::findOrFail($id);
 
-        $validated = $request->validate([
-            'customer_id'        => 'sometimes|integer|exists:tms_customer,cus_id',
-            'quotation_no'       => 'nullable|string|max:255',
-            'quotation_date'     => 'nullable|date',
-            'origin'             => 'nullable|string|max:255',
-            'destination'        => 'nullable|string|max:255',
-            'vehicle_type'       => 'nullable|string|max:255',
-            'rate'               => 'nullable|numeric',
-            'rate_type'          => 'nullable|string|max:255',
-            'estimated_distance' => 'nullable|numeric',
-            'estimated_time'     => 'nullable|numeric',
-            'remarks'            => 'nullable|string',
-            'status'             => 'nullable|string|max:255',
-        ]);
+            $validated = $request->validate([
+                'customer_id'        => 'sometimes|integer|exists:tms_customer,cus_id',
+                'quotation_no'       => 'nullable|string|max:255',
+                'quotation_date'     => 'nullable|date',
+                'origin'             => 'nullable|string|max:255',
+                'destination'        => 'nullable|string|max:255',
+                'vehicle_type'       => 'nullable|int',
+                'rate'               => 'nullable|numeric',
+                'rate_type'          => 'nullable|string|max:255',
+                'estimated_distance' => 'nullable|numeric',
+                'estimated_time'     => 'nullable|numeric',
+                'remarks'            => 'nullable|string',
+                'status'             => 'nullable|string|max:255',
+            ]);
 
-        $quotation->update($validated);
-        return response()->json([
-            'message' => 'Quotation updated successfully',
-            'status' => 200,
-            'quotation' => $quotation
-        ]);
+            $quotation->update($validated);
+
+            return response()->json([
+                'message' => 'Quotation updated successfully',
+                'status' => 200,
+                'quotation' => $quotation
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'message' => 'Validation failed',
+                'errors' => $e->errors(),
+                'status' => 422
+            ], 422);
+        }
     }
 
     // Delete a quotation

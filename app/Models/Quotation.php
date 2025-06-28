@@ -26,10 +26,17 @@ class Quotation extends Model
         'estimated_time',
         'remarks',
         'status',
+        'approve_user_id',
+        'approve_time',
     ];
 
     public function customer()
     {
         return $this->belongsTo(Customer::class, 'customer_id', 'cus_id');
+    }
+
+    public function vehicleType()
+    {
+        return $this->belongsTo(VehicleType::class, 'vehicle_type', 'veh_type_id');
     }
 }
