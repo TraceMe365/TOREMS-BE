@@ -12,7 +12,7 @@ class ShipmentController extends Controller
     {
         return response()->json([
             'status' => 200,
-            'shipments' => Shipment::all()
+            'shipments' => Shipment::with(['customer', 'vehicle', 'pickupLocation', 'deliveryLocation'])->get()
         ]);
     }
 
@@ -42,8 +42,22 @@ class ShipmentController extends Controller
                 'tms_shp_remarks'           => 'nullable|string',
                 'tms_start_odometer'        => 'nullable|numeric',
                 'tms_veh_id'                => 'nullable|integer',
+                'tms_shp_mode'              => 'nullable|string',
             ]);
             $shipment = Shipment::create($validated);
+
+            // Attach via locations if provided
+            if ($request->has('via_locations') && is_array($request->via_locations)) {
+                foreach ($request['via_locations'] as $via) {
+                $shipment->viaLocations()->create([
+                        'location_id'     => $via['via_location'],
+                        'via_location'    => $via['via_location_name'],
+                        'via_latitude'    => $via['via_latitude'],
+                        'via_longitude'   => $via['via_longitude'],
+                        'tms_shipment_id' => $shipment->id,
+                ]);
+            }
+            }
 
             return response()->json([
                 'message' => 'Shipment created successfully',

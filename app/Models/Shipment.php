@@ -11,6 +11,7 @@ class Shipment extends Model
 
     protected $fillable = [
         'tms_shp_order_id',
+        'quotation_id',
         'tms_shp_request_no',
         'tms_shp_order_number',
         'tms_cus_id',
@@ -163,4 +164,39 @@ class Shipment extends Model
         'tms_shp_pickup_out_datetime',
         'status',
     ];
+
+    public function quotation()
+    {
+        return $this->belongsTo(Quotation::class, 'quotation_id', 'id');
+    }
+
+    public function vehicleType()
+    {
+        return $this->belongsTo(VehicleType::class, 'tms_vty_id', 'veh_id');
+    }
+
+    public function customer()
+    {
+        return $this->belongsTo(Customer::class, 'tms_cus_id', 'cus_id');
+    }
+
+    public function vehicle()
+    {
+        return $this->belongsTo(Vehicle::class, 'tms_veh_id', 'veh_id');
+    }
+
+    public function pickupLocation()
+    {
+        return $this->belongsTo(Location::class, 'tms_shp_pickup_loc', 'loc_id');
+    }
+
+    public function deliveryLocation()
+    {
+        return $this->belongsTo(Location::class, 'tms_shp_delivery_loc', 'loc_id');
+    }
+
+    public function viaLocations()
+    {
+        return $this->hasMany(ViaLocation::class, 'tms_shipment_id', 'tms_shp_id');
+    }
 }
