@@ -49,14 +49,14 @@ class ShipmentController extends Controller
             // Attach via locations if provided
             if ($request->has('via_locations') && is_array($request->via_locations)) {
                 foreach ($request['via_locations'] as $via) {
-                $shipment->viaLocations()->create([
-                        'location_id'     => $via['via_location'],
-                        'via_location'    => $via['via_location_name'],
-                        'via_latitude'    => $via['via_latitude'],
-                        'via_longitude'   => $via['via_longitude'],
-                        'tms_shipment_id' => $shipment->id,
-                ]);
-            }
+                    $shipment->viaLocations()->create([
+                            'location_id'     => $via['via_location'],
+                            'via_location'    => $via['via_location_name'],
+                            'via_latitude'    => $via['via_latitude'],
+                            'via_longitude'   => $via['via_longitude'],
+                            'tms_shipment_id' => $shipment->id,
+                    ]);
+                }
             }
 
             return response()->json([
@@ -76,7 +76,7 @@ class ShipmentController extends Controller
     // Show a single shipment
     public function show($id)
     {
-        $shipment = Shipment::findOrFail($id);
+        $shipment = Shipment::with(['customer', 'vehicle', 'pickupLocation', 'deliveryLocation','viaLocations'])->where('tms_shp_id',$id)->firstOrFail();
         return response()->json([
             'status' => 200,
             'shipment' => $shipment
@@ -90,10 +90,44 @@ class ShipmentController extends Controller
             $shipment = Shipment::findOrFail($id);
 
             $validated = $request->validate([
-                // Add your shipment validation rules here
+                'tms_shp_request_no'   => 'required|string|max:255',
+                'tms_shp_pickup_loc'   => 'required|integer',
+                'tms_shp_delivery_loc' => 'required|integer',
+                'tms_shp_weight'       => 'required|string|max:255',
+                'tms_cus_id'           => 'required|integer',
+                'tms_vty_id'           => 'required|integer',
+                'tms_shp_request_date' => 'required|date',
+                'tms_shp_status'       => 'required|string|max:255',
+                
+                'quotation_id'              => 'nullable|integer',
+                'tms_end_odometer'          => 'nullable|numeric',
+                'tms_shp_arrived_delivery'  => 'nullable|date',
+                'tms_shp_arrived_pickup'    => 'nullable|date',
+                'tms_shp_cbm'               => 'nullable|string|max:255',
+                'tms_shp_departed_delivery' => 'nullable|date',
+                'tms_shp_departed_pickup'   => 'nullable|date',
+                'tms_shp_driver'            => 'nullable|string|max:255',
+                'tms_shp_helper'            => 'nullable|string|max:255',
+                'tms_shp_remarks'           => 'nullable|string',
+                'tms_start_odometer'        => 'nullable|numeric',
+                'tms_veh_id'                => 'nullable|integer',
+                'tms_shp_mode'              => 'nullable|string',
             ]);
 
             $shipment->update($validated);
+
+            // Attach via locations if provided
+            if ($request->has('via_locations') && is_array($request->via_locations)) {
+                foreach ($request['via_locations'] as $via) {
+                    $shipment->viaLocations()->create([
+                            'location_id'     => $via['via_location'],
+                            'via_location'    => $via['via_location_name'],
+                            'via_latitude'    => $via['via_latitude'],
+                            'via_longitude'   => $via['via_longitude'],
+                            'tms_shipment_id' => $shipment->id,
+                    ]);
+                }
+            }
 
             return response()->json([
                 'message' => 'Shipment updated successfully',
@@ -129,6 +163,105 @@ class ShipmentController extends Controller
         return response()->json([
             'request_no'   => $requestNo,
             'status'       => 200,
+        ]);
+    }
+
+    // Approve a shipment
+    public function approve($id)
+    {
+        $user = auth()->user();
+        if($user->role == 'admin'){
+            $shipment = Shipment::findOrFail($id);
+            $shipment->tms_shp_status = 'APPROVED';
+            $shipment->tms_shp_approved_user = $user->id;
+            $shipment->tms_shp_approved_date = now();
+            $shipment->save();
+
+            return response()->json([
+                'message' => 'Shipment approved successfully',
+                'status' => 200,
+                'shipment' => $shipment
+            ]);
+        }
+        else{
+            return response()->json([
+                'message' => 'Unauthorized action',
+                'status' => 403
+            ], 403);
+        }
+    }
+
+    // Cancel a shipment
+    public function cancel($id)
+    {
+        $user = auth()->user();
+        if($user->role == 'admin'){
+            $shipment = Shipment::findOrFail($id);
+            $shipment->tms_shp_status = 'CANCELLED';
+            $shipment->save();
+
+            return response()->json([
+                'message' => 'Shipment cancelled successfully',
+                'status' => 200,
+                'shipment' => $shipment
+            ]);
+        }
+        else{
+            return response()->json([
+                'message' => 'Unauthorized action',
+                'status' => 403
+            ], 403);
+        }
+    }
+
+    // Attend a shipment
+    public function attend($id)
+    {
+        $user = auth()->user();
+            if($user->role == 'admin'){
+            $shipment = Shipment::findOrFail($id);
+            $shipment->tms_shp_status = 'Attended';
+            $shipment->save();
+
+            return response()->json([
+                'message' => 'Shipment attended successfully',
+                'status' => 200,
+                'shipment' => $shipment
+            ]);
+        }
+        else{
+            return response()->json([
+                'message' => 'Unauthorized action',
+                'status' => 403
+            ], 403);
+        }
+    }
+
+    // Change shipment to ongoing status
+    public function setOngoing($id)
+    {
+        $shipment = Shipment::findOrFail($id);
+        $shipment->tms_shp_status = 'Ongoing';
+        $shipment->save();
+
+        return response()->json([
+            'message' => 'Shipment status changed to Ongoing',
+            'status' => 200,
+            'shipment' => $shipment
+        ]);
+    }
+
+    // Change shipment to complete status
+    public function setComplete($id)
+    {
+        $shipment = Shipment::findOrFail($id);
+        $shipment->tms_shp_status = 'Complete';
+        $shipment->save();
+
+        return response()->json([
+            'message' => 'Shipment status changed to Complete',
+            'status' => 200,
+            'shipment' => $shipment
         ]);
     }
 }
