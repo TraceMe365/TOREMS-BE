@@ -1,6 +1,8 @@
 <?php
 
+use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\JWTAuthController;
+use App\Http\Controllers\LocationController;
 use App\Http\Controllers\QuotationController;
 use App\Http\Controllers\QuotationControllerr;
 use App\Http\Controllers\ShipmentController;
@@ -24,5 +26,17 @@ Route::apiResource('vehicle-types', VehicleTypeController::class)
     ->middleware(['jwt.auth','action.logger']);
 
 // Shipments
+Route::get('/shipments/getRequestNo', [ShipmentController::class, 'getRequestNo'])
+    ->middleware(['jwt.auth','action.logger']);
 Route::apiResource('shipments', ShipmentController::class)
+    ->middleware(['jwt.auth','action.logger']);
+
+// Customer
+Route::get('/customers/getRequestNo', [CustomerController::class, 'getRequestNo'])
+    ->middleware(['jwt.auth','action.logger']);
+Route::apiResource('customers', CustomerController::class)
+    ->middleware(['jwt.auth','action.logger']);
+
+// Locations 
+Route::apiResource('locations', LocationController::class)
     ->middleware(['jwt.auth','action.logger']);
