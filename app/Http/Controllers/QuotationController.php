@@ -74,6 +74,18 @@ class QuotationController extends Controller
             $quotation->quotation_no = 'Q-' . str_pad($quotation->id, 6, '0', STR_PAD_LEFT);
             $quotation->save();
 
+            // Add via locations
+            if (isset($input['via_locations']) && is_array($input['via_locations'])) {
+                foreach ($input['via_locations'] as $via) {
+                    $quotation->viaLocations()->create([
+                        'via_location'     => $via['name'],
+                        'via_latitude'     => $via['lat'],
+                        'via_longitude'    => $via['lng'],
+                        'tms_quotation_id' => $quotation->id,
+                    ]);
+                }
+            }
+
             return response()->json([
                 'message' => 'Quotation created successfully',
                 'status' => 201,
@@ -91,7 +103,7 @@ class QuotationController extends Controller
     // Show a single quotation
     public function show($id)
     {
-        $quotation = Quotation::findOrFail($id);
+        $quotation = Quotation::with('viaLocations')->findOrFail($id);
         return response()->json([
             'status' => 200,
             'quotation' => $quotation

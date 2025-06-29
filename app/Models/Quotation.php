@@ -39,4 +39,9 @@ class Quotation extends Model
     {
         return $this->belongsTo(VehicleType::class, 'vehicle_type', 'veh_type_id');
     }
+
+    public function viaLocations()
+    {
+        return $this->hasMany(ViaLocation::class, 'tms_quotation_id', 'id');
+    }
 }
