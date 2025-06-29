@@ -11,9 +11,11 @@ class QuotationController extends Controller
     // List all quotations
     public function index()
     {
+        $quotations = Quotation::with(['vehicleType', 'originLocation', 'destinationLocation'])->get();
+
         return response()->json([
             'status' => 200,
-            'quotations' => Quotation::with('vehicleType')->get()
+            'quotations' => $quotations
         ]);
     }
 
@@ -140,7 +142,8 @@ class QuotationController extends Controller
     // Show a single quotation
     public function show($id)
     {
-        $quotation = Quotation::with('viaLocations')->findOrFail($id);
+        $quotation = Quotation::with(['viaLocations', 'originLocation', 'destinationLocation'])->findOrFail($id);
+
         return response()->json([
             'status' => 200,
             'quotation' => $quotation

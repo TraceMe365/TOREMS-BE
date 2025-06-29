@@ -47,4 +47,14 @@ class Quotation extends Model
     {
         return $this->hasMany(ViaLocation::class, 'tms_quotation_id', 'id');
     }
+
+    public function originLocation()
+    {
+        return $this->belongsTo(Location::class, 'origin_id', 'loc_id');
+    }
+
+    public function destinationLocation()
+    {
+        return $this->belongsTo(Location::class, 'destination_id', 'loc_id');
+    }
 }
