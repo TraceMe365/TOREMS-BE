@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\Customer;
+use App\Models\Employee;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -28,6 +30,7 @@ class JWTAuthController extends Controller
             return response()->json($validator->errors()->toJson(), 400);
         }
 
+        // Create the user first
         $user = User::create([
             'first_name' => $request->get('first_name'),
             'last_name'  => $request->get('last_name'),
@@ -37,6 +40,28 @@ class JWTAuthController extends Controller
             'contact'    => $request->get('contact'),
             'status'     => $request->get('status'),    
         ]);
+
+        // Create related Customer or Employee and update user with the ID
+        if ($user->role === 'customer') {
+            $customer = Customer::create([
+                'cus_name' => $user->first_name . ' ' . $user->last_name,
+                'cus_con_person' => $user->first_name . ' ' . $user->last_name,
+                'cus_con_person_num' => $user->contact,
+                'cus_con_person_email' => $user->email,
+                'cus_status' => 1,
+            ]);
+            $user->customer_id = $customer->cus_id;
+            $user->save();
+        } elseif ($user->role === 'driver') {
+            $employee = Employee::create([
+                'emp_f_name'  => $user->first_name,
+                'emp_s_name'  => $user->last_name,
+                'emp_contact' => $user->contact,
+                'emp_status'  => 1,
+            ]);
+            $user->emp_id = $employee->emp_id;
+            $user->save();
+        }
 
         return response()->json([
             'message' => 'Succesfully created user, please await administrator approval',
