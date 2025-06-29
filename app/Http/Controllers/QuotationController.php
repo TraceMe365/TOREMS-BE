@@ -29,6 +29,12 @@ class QuotationController extends Controller
         }
 
         $quotation = Quotation::findOrFail($id);
+        if (empty($quotation->rate) || empty($quotation->rate_type) || $quotation->rate==null || $quotation->rate_type==null) {
+            return response()->json([
+                'message' => 'Rate and Rate type must not be empty or null to approve the quotation',
+                'status' => 422,
+            ], 422);
+        }
         $quotation->status = 'APPROVED';
         $quotation->approve_user_id = $user->id;
         $quotation->approve_time = now();
