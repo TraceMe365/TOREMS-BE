@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Quotation;
+use App\Models\Location;
 use Illuminate\Http\Request;
 
 class QuotationController extends Controller
@@ -91,6 +92,33 @@ class QuotationController extends Controller
                     ]);
                 }
             }
+
+            if (isset($input['via_locations']) && is_array($input['via_locations'])) {
+                foreach ($input['via_locations'] as $via) {
+                    Location::firstOrCreate([
+                        'loc_name' => $via['name'],
+                        'loc_lat'  => $via['lat'],
+                        'loc_long' => $via['lng'],
+                        'cus_id' => $input['customer_id'] ?? null,
+                    ]);
+                }
+            }
+
+            // Store origin location
+            Location::firstOrCreate([
+                'loc_name' => $input['origin'],
+                'loc_lat'  => $input['origin_latitude'],
+                'loc_long' => $input['origin_longitude'],
+                'cus_id' => $input['customer_id'] ?? null,
+            ]);
+
+            // Store destination location
+            Location::firstOrCreate([
+                'loc_name' => $input['destination'],
+                'loc_lat'  => $input['destination_latitude'],
+                'loc_long' => $input['destination_longitude'],
+                'cus_id' => $input['customer_id'] ?? null,
+            ]);
 
             return response()->json([
                 'message' => 'Quotation created successfully',
