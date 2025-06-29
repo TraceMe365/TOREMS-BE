@@ -14,6 +14,7 @@ class ViaLocation extends Model
         'via_latitude',
         'via_longitude',
         'tms_quotation_id',
+        'location_id',
     ];
 
     public function shipment()

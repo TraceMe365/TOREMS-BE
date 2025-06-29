@@ -28,6 +28,9 @@ class Quotation extends Model
         'status',
         'approve_user_id',
         'approve_time',
+        'origin_id',
+        'destination_id',
+
     ];
 
     public function customer()

@@ -52,39 +52,69 @@ class QuotationController extends Controller
     public function store(Request $request)
     {
         try {
-            // If customer_id is empty or not set, default to 1
             $input = $request->all();
             if (empty($input['customer_id'])) {
                 $input['customer_id'] = 1;
             }
 
-            $validated = validator($input, [
-                'customer_id'           => 'required|integer|exists:tms_customer,cus_id',
-                'quotation_no'          => 'nullable|string|max:255',
-                'quotation_date'        => 'nullable|date',
-                'origin'           => 'required|string|max:255',
-                'origin_latitude'       => 'required|numeric',
-                'origin_longitude'      => 'required|numeric',
-                'destination'      => 'required|string|max:255',
-                'destination_latitude'  => 'required|numeric',
-                'destination_longitude' => 'required|numeric',
-                'vehicle_type'          => 'nullable|int',
-                'rate'                  => 'nullable|numeric',
-                'rate_type'             => 'nullable|string|max:255',
-                'estimated_distance'    => 'nullable|numeric',
-                'estimated_time'        => 'nullable|numeric',
-                'remarks'               => 'nullable|string',
-                'status'                => 'nullable|string|max:255',
+            // Store or get origin location
+            $originLocation = Location::firstOrCreate([
+                'loc_name' => $input['origin'],
+                'loc_lat'  => $input['origin_latitude'],
+                'loc_long' => $input['origin_longitude'],
+                'cus_id'   => $input['customer_id'] ?? null,
+            ]);
+            // Store or get destination location
+            $destinationLocation = Location::firstOrCreate([
+                'loc_name' => $input['destination'],
+                'loc_lat'  => $input['destination_latitude'],
+                'loc_long' => $input['destination_longitude'],
+                'cus_id'   => $input['customer_id'] ?? null,
+            ]);
+
+            $validated = validator([
+                'customer_id'           => $input['customer_id'],
+                'quotation_no'          => $input['quotation_no'] ?? null,
+                'quotation_date'        => $input['quotation_date'] ?? null,
+                'origin_id'             => $originLocation->loc_id,
+                'destination_id'        => $destinationLocation->loc_id,
+                'vehicle_type'          => $input['vehicle_type'] ?? null,
+                'rate'                  => $input['rate'] ?? null,
+                'rate_type'             => $input['rate_type'] ?? null,
+                'estimated_distance'    => $input['estimated_distance'] ?? null,
+                'estimated_time'        => $input['estimated_time'] ?? null,
+                'remarks'               => $input['remarks'] ?? null,
+                'status'                => $input['status'] ?? null,
+            ], [
+                'customer_id'        => 'required|integer|exists:tms_customer,cus_id',
+                'quotation_no'       => 'nullable|string|max:255',
+                'quotation_date'     => 'nullable|date',
+                'origin_id'          => 'required|integer|exists:tms_location,loc_id',
+                'destination_id'     => 'required|integer|exists:tms_location,loc_id',
+                'vehicle_type'       => 'nullable|int',
+                'rate'               => 'nullable|numeric',
+                'rate_type'          => 'nullable|string|max:255',
+                'estimated_distance' => 'nullable|numeric',
+                'estimated_time'     => 'nullable|numeric',
+                'remarks'            => 'nullable|string',
+                'status'             => 'nullable|string|max:255',
             ])->validate();
 
             $quotation = Quotation::create($validated);
             $quotation->quotation_no = 'Q-' . str_pad($quotation->id, 6, '0', STR_PAD_LEFT);
             $quotation->save();
 
-            // Add via locations
+            // Add via locations (store location and link via_locations)
             if (isset($input['via_locations']) && is_array($input['via_locations'])) {
                 foreach ($input['via_locations'] as $via) {
+                    $viaLocation = Location::firstOrCreate([
+                        'loc_name' => $via['name'],
+                        'loc_lat'  => $via['lat'],
+                        'loc_long' => $via['lng'],
+                        'cus_id'   => $input['customer_id'] ?? null,
+                    ]);
                     $quotation->viaLocations()->create([
+                        'location_id'      => $viaLocation->loc_id,
                         'via_location'     => $via['name'],
                         'via_latitude'     => $via['lat'],
                         'via_longitude'    => $via['lng'],
@@ -92,33 +122,6 @@ class QuotationController extends Controller
                     ]);
                 }
             }
-
-            if (isset($input['via_locations']) && is_array($input['via_locations'])) {
-                foreach ($input['via_locations'] as $via) {
-                    Location::firstOrCreate([
-                        'loc_name' => $via['name'],
-                        'loc_lat'  => $via['lat'],
-                        'loc_long' => $via['lng'],
-                        'cus_id' => $input['customer_id'] ?? null,
-                    ]);
-                }
-            }
-
-            // Store origin location
-            Location::firstOrCreate([
-                'loc_name' => $input['origin'],
-                'loc_lat'  => $input['origin_latitude'],
-                'loc_long' => $input['origin_longitude'],
-                'cus_id' => $input['customer_id'] ?? null,
-            ]);
-
-            // Store destination location
-            Location::firstOrCreate([
-                'loc_name' => $input['destination'],
-                'loc_lat'  => $input['destination_latitude'],
-                'loc_long' => $input['destination_longitude'],
-                'cus_id' => $input['customer_id'] ?? null,
-            ]);
 
             return response()->json([
                 'message' => 'Quotation created successfully',
@@ -146,16 +149,45 @@ class QuotationController extends Controller
 
     // Update a quotation
     public function update(Request $request, $id)
-    { 
+    {
         try {
             $quotation = Quotation::findOrFail($id);
+            $input = $request->all();
 
-            $validated = $request->validate([
+            // Update or get origin location
+            $originLocation = Location::firstOrCreate([
+                'loc_name' => $input['origin'],
+                'loc_lat'  => $input['origin_latitude'],
+                'loc_long' => $input['origin_longitude'],
+                'cus_id'   => $input['customer_id'] ?? null,
+            ]);
+            // Update or get destination location
+            $destinationLocation = Location::firstOrCreate([
+                'loc_name' => $input['destination'],
+                'loc_lat'  => $input['destination_latitude'],
+                'loc_long' => $input['destination_longitude'],
+                'cus_id'   => $input['customer_id'] ?? null,
+            ]);
+
+            $validated = validator([
+                'customer_id'           => $input['customer_id'],
+                'quotation_no'          => $input['quotation_no'] ?? null,
+                'quotation_date'        => $input['quotation_date'] ?? null,
+                'origin_id'             => $originLocation->loc_id,
+                'destination_id'        => $destinationLocation->loc_id,
+                'vehicle_type'          => $input['vehicle_type'] ?? null,
+                'rate'                  => $input['rate'] ?? null,
+                'rate_type'             => $input['rate_type'] ?? null,
+                'estimated_distance'    => $input['estimated_distance'] ?? null,
+                'estimated_time'        => $input['estimated_time'] ?? null,
+                'remarks'               => $input['remarks'] ?? null,
+                'status'                => $input['status'] ?? null,
+            ], [
                 'customer_id'        => 'sometimes|integer|exists:tms_customer,cus_id',
                 'quotation_no'       => 'nullable|string|max:255',
                 'quotation_date'     => 'nullable|date',
-                'origin'             => 'nullable|string|max:255',
-                'destination'        => 'nullable|string|max:255',
+                'origin_id'          => 'required|integer|exists:tms_location,loc_id',
+                'destination_id'     => 'required|integer|exists:tms_location,loc_id',
                 'vehicle_type'       => 'nullable|int',
                 'rate'               => 'nullable|numeric',
                 'rate_type'          => 'nullable|string|max:255',
@@ -163,9 +195,32 @@ class QuotationController extends Controller
                 'estimated_time'     => 'nullable|numeric',
                 'remarks'            => 'nullable|string',
                 'status'             => 'nullable|string|max:255',
-            ]);
+            ])->validate();
 
             $quotation->update($validated);
+
+            // Update via locations: remove old and add new if provided
+            if (isset($input['via_locations']) && is_array($input['via_locations'])) {
+                // Remove existing via locations for this quotation
+                $quotation->viaLocations()->delete();
+
+                // Add new via locations
+                foreach ($input['via_locations'] as $via) {
+                    $viaLocation = Location::firstOrCreate([
+                        'loc_name' => $via['name'],
+                        'loc_lat'  => $via['lat'],
+                        'loc_long' => $via['lng'],
+                        'cus_id'   => $input['customer_id'] ?? null,
+                    ]);
+                    $quotation->viaLocations()->create([
+                        'location_id'      => $viaLocation->loc_id,
+                        'via_location'     => $via['name'],
+                        'via_latitude'     => $via['lat'],
+                        'via_longitude'    => $via['lng'],
+                        'tms_quotation_id' => $quotation->id,
+                    ]);
+                }
+            }
 
             return response()->json([
                 'message' => 'Quotation updated successfully',
