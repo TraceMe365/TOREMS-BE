@@ -44,8 +44,20 @@ class ShipmentController extends Controller
                 'tms_veh_id'                => 'nullable|integer',
                 'tms_shp_mode'              => 'nullable|string',
             ]);
+            // Convert ISO 8601 time fields to SQL datetime format if present
+            $timeFields = [
+                'tms_shp_arrived_delivery',
+                'tms_shp_arrived_pickup',
+                'tms_shp_departed_delivery',
+                'tms_shp_departed_pickup',
+            ];
+            foreach ($timeFields as $field) {
+                if (!empty($validated[$field])) {
+                    $validated[$field] = date('Y-m-d H:i:s', strtotime($validated[$field]));
+                }
+            }
             $shipment = Shipment::create($validated);
-
+            
             // Attach via locations if provided
             if ($request->has('via_locations') && is_array($request->via_locations)) {
                 foreach ($request['via_locations'] as $via) {
@@ -263,5 +275,31 @@ class ShipmentController extends Controller
             'status' => 200,
             'shipment' => $shipment
         ]);
+    }
+
+    public function assignVehicleDriver($id){
+        $shipment = Shipment::findOrFail($id);
+        $user = auth()->user();
+        if($user->role == 'admin'){
+            $validated = request()->validate([
+                'tms_veh_id'     => 'required|integer',
+                'tms_shp_driver' => 'required|string|max:255',
+                'tms_shp_helper' => 'nullable|string|max:255'
+            ]);
+
+            $shipment->update($validated);
+
+            return response()->json([
+                'message'  => 'Vehicle and driver assigned successfully',
+                'status'   => 200,
+                'shipment' => $shipment
+            ]);
+        }
+        else{
+            return response()->json([
+                'message' => 'Unauthorized action',
+                'status'  => 403
+            ], 403);
+        }
     }
 }
