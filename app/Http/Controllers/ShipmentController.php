@@ -254,6 +254,7 @@ class ShipmentController extends Controller
     {
         $shipment = Shipment::findOrFail($id);
         $shipment->tms_shp_status = 'Ongoing';
+        $shipment->tms_shp_shipment_start = now(); // Set the start time to now
         $shipment->save();
 
         return response()->json([
@@ -268,6 +269,7 @@ class ShipmentController extends Controller
     {
         $shipment = Shipment::findOrFail($id);
         $shipment->tms_shp_status = 'Complete';
+        $shipment->tms_shp_shipment_end = now(); // Set the end time to now
         $shipment->save();
 
         return response()->json([
@@ -277,6 +279,7 @@ class ShipmentController extends Controller
         ]);
     }
 
+    // Assign vehicle and driver to a shipment
     public function assignVehicleDriver($id){
         $shipment = Shipment::findOrFail($id);
         $user = auth()->user();
@@ -288,7 +291,10 @@ class ShipmentController extends Controller
             ]);
 
             $shipment->update($validated);
-
+            // Update shipment status to Attended
+            $shipment->tms_shp_status = 'Attended';
+            $shipment->tms_ship_attended_date = now();
+            $shipment->save();
             return response()->json([
                 'message'  => 'Vehicle and driver assigned successfully',
                 'status'   => 200,

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\JWTAuthController;
@@ -67,4 +68,8 @@ Route::apiResource('vehicles', VehicleController::class)
 
 // Employee
 Route::apiResource('employees', EmployeeController::class)
+    ->middleware(['jwt.auth','action.logger']);
+
+// Company
+Route::apiResource('company', CompanyController::class)
     ->middleware(['jwt.auth','action.logger']);
