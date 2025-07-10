@@ -8,6 +8,7 @@ use App\Http\Controllers\LocationController;
 use App\Http\Controllers\QuotationController;
 use App\Http\Controllers\QuotationControllerr;
 use App\Http\Controllers\ShipmentController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\VehicleController;
 use App\Http\Controllers\VehicleTypeController;
 use Illuminate\Http\Request;
@@ -72,4 +73,12 @@ Route::apiResource('employees', EmployeeController::class)
 
 // Company
 Route::apiResource('company', CompanyController::class)
+    ->middleware(['jwt.auth','action.logger']);
+
+// User
+Route::post('/users/{id}/approve', [UserController::class, 'approve'])
+    ->middleware(['jwt.auth','action.logger']);
+Route::post('/users/{id}/reject', [UserController::class, 'reject'])
+    ->middleware(['jwt.auth','action.logger']);
+Route::apiResource('users', UserController::class)
     ->middleware(['jwt.auth','action.logger']);
