@@ -78,7 +78,15 @@ class CompanyController extends Controller
                 'website'                    => 'nullable|string|max:255',
                 'business_registration_code' => 'nullable|string|max:255',
                 'company_vat_number'         => 'nullable|string|max:255',
+                'image'                      => 'nullable|image|mimes:jpeg,png,jpg,gif,svg',
             ]);
+
+            if ($request->hasFile('image')) {
+                $image = $request->file('image');
+                $imageName = uniqid('company_', true) . '.' . $image->getClientOriginalExtension();
+                $imagePath = $image->storeAs('company_images', $imageName, 'public');
+                $validated['image_path'] = 'storage/' . $imagePath;
+            }
 
             $company->update($validated);
 
