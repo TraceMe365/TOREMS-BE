@@ -78,13 +78,16 @@ class JWTAuthController extends Controller
             if (! $token = JWTAuth::attempt($credentials)) {
                 return response()->json(['error' => 'Invalid credentials'], 401);
             }
-
             // Get the authenticated user.
             $user = auth()->user();
-
+            if ($user->status == 'PENDING' || $user->status === 'pending') {
+                return response()->json(['error' => 'Registration pending approval'],403);
+            }
+            if ($user->status == 'REJECTED' || $user->status === 'rejected') {
+                return response()->json(['error' => 'Registration rejected'], 403);
+            }
             // (optional) Attach the role to the token.
             $token = JWTAuth::claims(['role' => $user->role])->fromUser($user);
-
             return response()->json(array("access_token"=>$token,"token_type"=>"Bearer","user"=>$user), 200);
         } catch (JWTException $e) {
             return response()->json(['error' => 'Could not create token'], 500);

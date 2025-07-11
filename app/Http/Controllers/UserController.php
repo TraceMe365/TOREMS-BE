@@ -40,7 +40,14 @@ class UserController extends Controller
                 'role'       => 'nullable|string|max:255',
                 'contact'    => 'nullable|string|max:255',
                 'status'     => 'nullable|string',
+                'image'      => 'nullable|image|mimes:jpeg,png,jpg,gif,svg',
             ]);
+
+            if ($request->hasFile('image')) {
+                $image = $request->file('image');
+                $imagePath = $image->store('user_images', 'public');
+                $validated['image'] = $imagePath;
+            }
 
             if (!empty($validated['password'])) {
                 $validated['password'] = bcrypt($validated['password']);
