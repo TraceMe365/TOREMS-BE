@@ -8,6 +8,7 @@ use App\Http\Controllers\JWTAuthController;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\QuotationController;
 use App\Http\Controllers\QuotationControllerr;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ShipmentController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\VehicleController;
@@ -87,3 +88,8 @@ Route::apiResource('users', UserController::class)
 // Backup
 Route::get('/database-backup', [ConfigController::class, 'downloadBackup'])
     ->middleware(['jwt.auth','action.logger']);
+
+
+
+// TEST EMAIL 
+Route::get('/test-email', [ReportController::class, 'sendtestmail']);
