@@ -45,8 +45,9 @@ class UserController extends Controller
 
             if ($request->hasFile('image')) {
                 $image = $request->file('image');
-                $imagePath = $image->store('user_images', 'public');
-                $validated['image'] = $imagePath;
+                $imageName = uniqid('user_', true) . '.' . $image->getClientOriginalExtension();
+                $imagePath = $image->storeAs('user_images', $imageName, 'public');
+                $validated['image'] = 'storage/' . $imagePath;
             }
 
             if (!empty($validated['password'])) {
