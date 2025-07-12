@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\CompanyController;
+use App\Http\Controllers\ConfigController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\JWTAuthController;
@@ -81,4 +82,8 @@ Route::post('/users/{id}/approve', [UserController::class, 'approve'])
 Route::post('/users/{id}/reject', [UserController::class, 'reject'])
     ->middleware(['jwt.auth','action.logger']);
 Route::apiResource('users', UserController::class)
+    ->middleware(['jwt.auth','action.logger']);
+
+// Backup
+Route::get('/database-backup', [ConfigController::class, 'downloadBackup'])
     ->middleware(['jwt.auth','action.logger']);
