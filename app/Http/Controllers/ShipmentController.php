@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Shipment;
+use App\Models\ViaLocation;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 
@@ -131,14 +132,28 @@ class ShipmentController extends Controller
 
             // Attach via locations if provided
             if ($request->has('via_locations') && is_array($request->via_locations)) {
+                // First, delete existing via locations
+                ViaLocation::where('tms_shipment_id', $shipment->tms_shp_id)->delete();
                 foreach ($request['via_locations'] as $via) {
-                    $shipment->viaLocations()->create([
+                    if(is_numeric($via['via_location'])){
+                        $shipment->viaLocations()->create([
                             'location_id'     => $via['via_location'],
                             'via_location'    => $via['via_location_name'],
                             'via_latitude'    => $via['via_latitude'],
                             'via_longitude'   => $via['via_longitude'],
                             'tms_shipment_id' => $shipment->id,
-                    ]);
+                        ]);
+                    }
+                    else{
+                        $shipment->viaLocations()->create([
+                            'location_id'     => $via['id'],
+                            'via_location'    => $via['via_location_name'],
+                            'via_latitude'    => $via['via_latitude'],
+                            'via_longitude'   => $via['via_longitude'],
+                            'tms_shipment_id' => $shipment->id,
+                        ]);
+                    }
+                    
                 }
             }
 
