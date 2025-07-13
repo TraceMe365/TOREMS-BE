@@ -199,4 +199,9 @@ class Shipment extends Model
     {
         return $this->hasMany(ViaLocation::class, 'tms_shipment_id', 'tms_shp_id');
     }
+
+    public function driver()
+    {
+        return $this->belongsTo(Employee::class, 'tms_shp_driver', 'emp_id');
+    }
 }

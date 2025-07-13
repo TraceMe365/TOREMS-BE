@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Shipment;
 use Illuminate\Http\Request;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class ShipmentController extends Controller
 {
@@ -307,5 +308,23 @@ class ShipmentController extends Controller
                 'status'  => 403
             ], 403);
         }
+    }
+
+    public function printGatepass($id)
+    {
+        $shipment = Shipment::with([
+            'customer',
+            'vehicle.vehicle_type',
+            'pickupLocation',
+            'deliveryLocation',
+            'driver'
+        ])->findOrFail($id);
+        $company = \App\Models\CompanyModel::first();
+        
+        $pdf = Pdf::loadView('gatepass', compact('shipment', 'company'));
+        $shipment->tms_is_gate_pass_print = ($shipment->tms_is_gate_pass_print) + 1;
+        $shipment->save();
+        return $pdf->download('gatepass_'.$shipment->tms_shp_request_no.'.pdf');
+
     }
 }

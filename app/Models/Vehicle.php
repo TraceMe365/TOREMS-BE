@@ -45,4 +45,9 @@ class Vehicle extends Model
         'veh_registration_expiry',
         'veh_license_expiry',
     ];
+
+    public function vehicle_type()
+    {
+        return $this->belongsTo(VehicleType::class, 'vehicle_type', 'veh_type_id');
+    }
 }

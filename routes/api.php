@@ -4,6 +4,7 @@ use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\ConfigController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\EmployeeController;
+use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\JWTAuthController;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\QuotationController;
@@ -43,6 +44,7 @@ Route::apiResource('shipments', ShipmentController::class)
 Route::get('/customers/getRequestNo', [CustomerController::class, 'getRequestNo'])
     ->middleware(['jwt.auth','action.logger']);
 
+// Shipment
 Route::post('/shipments/{id}/approve', [ShipmentController::class, 'approve'])
     ->middleware(['jwt.auth','action.logger']);
 
@@ -57,6 +59,10 @@ Route::post('/shipments/{id}/ongoing', [ShipmentController::class, 'setOngoing']
 
 Route::post('/shipments/{id}/complete', [ShipmentController::class, 'setComplete'])
     ->middleware(['jwt.auth','action.logger']);
+
+Route::get('/shipments/{id}/print-gatepass', [ShipmentController::class, 'printGatepass'])
+    ->middleware(['jwt.auth','action.logger']);
+
 
 Route::apiResource('customers', CustomerController::class)
     ->middleware(['jwt.auth','action.logger']);
@@ -89,7 +95,9 @@ Route::apiResource('users', UserController::class)
 Route::get('/database-backup', [ConfigController::class, 'downloadBackup'])
     ->middleware(['jwt.auth','action.logger']);
 
-
+// Invoice
+Route::apiResource('invoice', InvoiceController::class)
+    ->middleware(['jwt.auth','action.logger']);
 
 // TEST EMAIL 
 Route::get('/test-email', [ReportController::class, 'sendtestmail']);
