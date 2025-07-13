@@ -58,6 +58,10 @@
                 <th>Created</th>
                 <td colspan="3">{{ $shipment->created_at }}</td>
             </tr>
+             <tr>
+                <th>Customer</th>
+                <td colspan="3">{{ $shipment->customer->cus_name }}</td>
+            </tr>
         </table>
 
         <div class="section-title">VEHICLES AND EMPLOYEE DETAILS</div>
@@ -71,8 +75,8 @@
             <tr>
                 <th>Pickup Date & Time</th>
                 <td>{{ $shipment->tms_shp_request_date }}</td>
-                <th>Helper Contact</th>
-                <td>{{ $shipment->helper_contact ?? '' }}</td>
+                <th>Driver Contact</th>
+                <td>{{ $shipment->driver->emp_mobile ?? '' }}</td>
             </tr>
         </table>
 

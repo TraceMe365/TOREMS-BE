@@ -13,7 +13,7 @@ class ShipmentController extends Controller
     {
         return response()->json([
             'status' => 200,
-            'shipments' => Shipment::with(['customer', 'vehicle', 'pickupLocation', 'deliveryLocation'])->get()
+            'shipments' => Shipment::with(['customer', 'vehicle', 'pickupLocation', 'deliveryLocation','driver'])->get()
         ]);
     }
 
@@ -275,6 +275,35 @@ class ShipmentController extends Controller
 
         return response()->json([
             'message' => 'Shipment status changed to Complete',
+            'status' => 200,
+            'shipment' => $shipment
+        ]);
+    }
+
+    // Arrived at pickup
+    public function arrivedAtPickup($id)
+    {
+        $shipment = Shipment::findOrFail($id);
+        $shipment->tms_shp_arrived_pickup = now();
+        $shipment->tms_shp_arrived_at_pickup_by = auth()->user()->id;
+        $shipment->save();
+
+        return response()->json([
+            'message' => 'Shipment arrived at pickup location',
+            'status' => 200,
+            'shipment' => $shipment
+        ]);
+    }
+
+    public function arrivedAtVia($id,$locationId){
+        $shipment = Shipment::with('viaLocations')->findOrFail($id);
+        $shipment->viaLocations()->where('location_id', $locationId)
+        ->where('tms_shipment_id', $shipment->tms_shp_id)
+        ->update([
+            'arrived_at' => now()
+        ]);
+        return response()->json([
+            'message' => 'Arrived at via location',
             'status' => 200,
             'shipment' => $shipment
         ]);
