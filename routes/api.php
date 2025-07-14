@@ -46,7 +46,7 @@ Route::get('/customers/getRequestNo', [CustomerController::class, 'getRequestNo'
 
 // Shipment
 Route::post('/shipments/{id}/approve', [ShipmentController::class, 'approve'])
-    ->middleware(['jwt.auth','action.logger']);\
+    ->middleware(['jwt.auth','action.logger']);
 
 Route::post('/shipments/{id}/arrived', [ShipmentController::class, 'arrivedAtPickup'])
     ->middleware(['jwt.auth','action.logger']);

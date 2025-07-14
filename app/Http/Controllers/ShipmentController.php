@@ -298,15 +298,15 @@ class ShipmentController extends Controller
     // Arrived at pickup
     public function arrivedAtPickup($id)
     {
-        $shipment = Shipment::findOrFail($id);
-        $shipment->tms_shp_arrived_pickup = now();
+        $shipment                               = Shipment::findOrFail($id);
+        $shipment->tms_shp_arrived_pickup       = now();
         $shipment->tms_shp_arrived_at_pickup_by = auth()->user()->id;
+        $shipment->tms_shp_status               = 'Arrived at Pickup';
         $shipment->save();
 
         return response()->json([
             'message' => 'Shipment arrived at pickup location',
-            'status' => 200,
-            'shipment' => $shipment
+            'status'  => 200
         ]);
     }
 
