@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Shipment;
 use Illuminate\Http\Request;
 use App\Models\Invoice;
 
@@ -76,6 +77,37 @@ class InvoiceController extends Controller
 
         return response()->json([
             'message' => 'Invoice deleted successfully',
+            'status' => 200
+        ]);
+    }
+
+    public function addCosts(){
+        $data = request()->all();
+        $shipment = Shipment::find($data['shipmentId']);
+        if (!$shipment) {
+            return response()->json([
+                'message' => 'Shipment not found',
+                'status' => 404
+            ], 404);
+        }
+        else{
+            $shipment->update([
+                'tms_total_trip_cost'      => $data['totalTripCost'] ?? 0,
+                'tms_shp_trip_cost'        => $data['tripCost'] ?? 0,
+                'tms_shp_other_amount'     => $data['other'] ?? 0,
+                'tms_shp_unloading_charge' => $data['unloading'] ?? 0,
+                'tms_shp_loading_charge'   => $data['loading'] ?? 0,
+                'tms_shp_highway_charge'   => $data['highway'] ?? 0,
+                'tms_shp_night_bata'       => $data['nightBata'] ?? 0,
+                'tms_shp_deductions'       => $data['deduction'] ?? 0,
+                'tms_shp_boi_charge'       => $data['boi'] ?? 0,
+                'tms_shp_demurrage_amount' => $data['demurrage'] ?? 0,
+            ]);
+            $shipment->save();
+        }
+        return response()->json([
+            'message' => 'Costs added successfully',
+            'data' => $data,
             'status' => 200
         ]);
     }

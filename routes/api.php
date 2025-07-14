@@ -99,6 +99,9 @@ Route::get('/database-backup', [ConfigController::class, 'downloadBackup'])
     ->middleware(['jwt.auth','action.logger']);
 
 // Invoice
+Route::post('/addCosts', [InvoiceController::class, 'addCosts'])
+    ->middleware(['jwt.auth','action.logger']);
+
 Route::apiResource('invoice', InvoiceController::class)
     ->middleware(['jwt.auth','action.logger']);
 

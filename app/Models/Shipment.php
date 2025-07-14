@@ -61,6 +61,7 @@ class Shipment extends Model
         'tms_shp_estimated_mileage',
         'tms_shp_actial_trip_mileage',
         'tms_shp_trip_cost',
+        'tms_total_trip_cost',
         'tms_shp_additional_cost_per',
         'tms_shp_demurrage_amount_customer',
         'tms_shp_other_amount',
