@@ -92,16 +92,17 @@ class InvoiceController extends Controller
         }
         else{
             $shipment->update([
-                'tms_total_trip_cost'      => $data['totalTripCost'] ?? 0,
-                'tms_shp_trip_cost'        => $data['tripCost'] ?? 0,
-                'tms_shp_other_amount'     => $data['other'] ?? 0,
-                'tms_shp_unloading_charge' => $data['unloading'] ?? 0,
-                'tms_shp_loading_charge'   => $data['loading'] ?? 0,
-                'tms_shp_highway_charge'   => $data['highway'] ?? 0,
-                'tms_shp_night_bata'       => $data['nightBata'] ?? 0,
-                'tms_shp_deductions'       => $data['deduction'] ?? 0,
-                'tms_shp_boi_charge'       => $data['boi'] ?? 0,
-                'tms_shp_demurrage_amount' => $data['demurrage'] ?? 0,
+                'tms_total_trip_cost'       => $data['totalTripCost'] ?? 0,
+                'tms_shp_trip_cost'         => $data['tripCost'] ?? 0,
+                'tms_shp_other_amount'      => $data['other'] ?? 0,
+                'tms_shp_unloading_charge'  => $data['unloading'] ?? 0,
+                'tms_shp_loading_charge'    => $data['loading'] ?? 0,
+                'tms_shp_highway_charge'    => $data['highway'] ?? 0,
+                'tms_shp_night_bata'        => $data['nightBata'] ?? 0,
+                'tms_shp_deductions'        => $data['deduction'] ?? 0,
+                'tms_shp_boi_charge'        => $data['boi'] ?? 0,
+                'tms_shp_demurrage_amount'  => $data['demurrage'] ?? 0,
+                'tms_shp_estimated_mileage' => $data['estimatedMileage'] ?? 0,
             ]);
             $shipment->save();
         }

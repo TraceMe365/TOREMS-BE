@@ -371,4 +371,31 @@ class ShipmentController extends Controller
         return $pdf->download('gatepass_'.$shipment->tms_shp_request_no.'.pdf');
 
     }
+
+    public function getCosts($id){
+        $shipment = Shipment::findOrFail($id);
+        if($shipment){
+            $costs = [
+                "estimatedMileage" => $shipment->tms_shp_estimated_mileage,
+                "totalTripCost"    => $shipment->tms_total_trip_cost,
+                "tripCost"         => $shipment->tms_shp_trip_cost,
+                "nightBata"        => $shipment->tms_shp_night_bata,
+                "highway"          => $shipment->tms_shp_highway_charge,
+                "loading"          => $shipment->tms_shp_loading_charge,
+                "unloading"        => $shipment->tms_shp_unloading_charge,
+                "boi"              => $shipment->tms_shp_boi_charge,
+                "other"            => $shipment->tms_shp_other_amount,
+                "deduction"        => $shipment->tms_shp_deductions,
+                "demurrage"        => $shipment->tms_shp_demurrage_amount,
+            ];
+            return response()->json([
+                'status' => 200,
+                'costs'   => $costs
+            ]);
+        }
+        return response()->json([
+            'status' => 404,
+            'message' => 'Shipment not found'
+        ], 404);
+    }
 }
