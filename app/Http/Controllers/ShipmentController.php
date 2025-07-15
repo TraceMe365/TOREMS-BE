@@ -22,6 +22,20 @@ class ShipmentController extends Controller
             'shipments' => $shipments
         ]);
     }
+    
+    public function getShipmentsForInvoice(Request $request)
+    {
+        $query = Shipment::with(['customer', 'vehicle', 'pickupLocation', 'deliveryLocation', 'driver']);
+        if ($request->has('customer_id')) {
+            $query->where('tms_cus_id', $request->customer_id);
+        }
+        $query->where("isInvoice",0);
+        $shipments = $query->get();
+        return response()->json([
+            'status' => 200,
+            'shipments' => $shipments
+        ]);
+    }
 
     // Store a new shipment
     public function store(Request $request)

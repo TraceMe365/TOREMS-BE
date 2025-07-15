@@ -37,18 +37,16 @@ Route::get('/shipments/getRequestNo', [ShipmentController::class, 'getRequestNo'
     ->middleware(['jwt.auth','action.logger']);
 Route::post('/shipments/{id}/assign', [ShipmentController::class, 'assignVehicleDriver'])
     ->middleware(['jwt.auth','action.logger']);
-Route::apiResource('shipments', ShipmentController::class)
-    ->middleware(['jwt.auth','action.logger']);
 
-// Customer
-Route::get('/customers/getRequestNo', [CustomerController::class, 'getRequestNo'])
-    ->middleware(['jwt.auth','action.logger']);
 
 // Shipment
 Route::post('/shipments/{id}/approve', [ShipmentController::class, 'approve'])
     ->middleware(['jwt.auth','action.logger']);
 
 Route::get('/shipments/{id}/costs', [ShipmentController::class, 'getCosts'])
+    ->middleware(['jwt.auth','action.logger']);
+
+Route::get('/shipments/invoice', [ShipmentController::class, 'getShipmentsForInvoice'])
     ->middleware(['jwt.auth','action.logger']);
 
 Route::post('/shipments/{id}/arrived', [ShipmentController::class, 'arrivedAtPickup'])
@@ -69,6 +67,12 @@ Route::post('/shipments/{id}/complete', [ShipmentController::class, 'setComplete
 Route::get('/shipments/{id}/print-gatepass', [ShipmentController::class, 'printGatepass'])
     ->middleware(['jwt.auth','action.logger']);
 
+Route::apiResource('shipments', ShipmentController::class)
+    ->middleware(['jwt.auth','action.logger']);
+
+// Customer
+Route::get('/customers/getRequestNo', [CustomerController::class, 'getRequestNo'])
+    ->middleware(['jwt.auth','action.logger']);
 
 Route::apiResource('customers', CustomerController::class)
     ->middleware(['jwt.auth','action.logger']);
