@@ -10,11 +10,16 @@ use Barryvdh\DomPDF\Facade\Pdf;
 class ShipmentController extends Controller
 {
     // List all shipments
-    public function index()
+    public function index(Request $request)
     {
+        $query = Shipment::with(['customer', 'vehicle', 'pickupLocation', 'deliveryLocation', 'driver']);
+        if ($request->has('customer_id')) {
+            $query->where('tms_cus_id', $request->customer_id);
+        }
+        $shipments = $query->get();
         return response()->json([
             'status' => 200,
-            'shipments' => Shipment::with(['customer', 'vehicle', 'pickupLocation', 'deliveryLocation','driver'])->get()
+            'shipments' => $shipments
         ]);
     }
 

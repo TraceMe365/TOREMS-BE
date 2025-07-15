@@ -29,4 +29,14 @@ class Invoice extends Model
         'tms_inv_processed_user',
         'tms_inv_processed_date',
     ];
+
+    public function customer()
+    {
+        return $this->belongsTo(Customer::class, 'tms_cus_id', 'cus_id');
+    }
+
+    public function entries()
+    {
+        return $this->hasMany(InvoiceEntry::class, 'tms_inv_id', 'tms_inv_id');
+    }
 }

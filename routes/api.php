@@ -105,7 +105,16 @@ Route::get('/database-backup', [ConfigController::class, 'downloadBackup'])
 Route::post('/addCosts', [InvoiceController::class, 'addCosts'])
     ->middleware(['jwt.auth','action.logger']);
 
+Route::post('/invoice/{id}/approve', [InvoiceController::class, 'approveInvoice'])
+    ->middleware(['jwt.auth','action.logger']);
+
+Route::post('/invoice/{id}/cancel', [InvoiceController::class, 'cancelInvoice'])
+    ->middleware(['jwt.auth','action.logger']);
+    
 Route::get('/invoices/generate-invoice-no', [InvoiceController::class, 'generateInvoiceNumber'])
+    ->middleware(['jwt.auth','action.logger']);
+
+Route::get('/invoice/{id}/print', [InvoiceController::class, 'printInvoice'])
     ->middleware(['jwt.auth','action.logger']);
 
 Route::apiResource('invoice', InvoiceController::class)

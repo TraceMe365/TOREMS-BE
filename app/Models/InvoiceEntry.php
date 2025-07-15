@@ -33,4 +33,9 @@ class InvoiceEntry extends Model
     {
         return $this->belongsTo(Invoice::class, 'tms_inv_id', 'tms_inv_id');
     }
+
+    public function shipment()
+    {
+        return $this->belongsTo(Shipment::class, 'tms_ien_request_id', 'tms_shp_id');
+    }
 }

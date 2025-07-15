@@ -6,6 +6,8 @@ use App\Models\InvoiceEntry;
 use App\Models\Shipment;
 use Illuminate\Http\Request;
 use App\Models\Invoice;
+use Barryvdh\DomPDF\Facade\Pdf;
+use App\Models\CompanyModel; // Adjust if your company model is named differently
 
 class InvoiceController extends Controller
 {
@@ -14,14 +16,38 @@ class InvoiceController extends Controller
     {
         return response()->json([
             'status' => 200,
-            'invoices' => Invoice::all()
+            'invoices' => Invoice::with(['customer'])->get()
+        ]);
+    }
+
+    public function approveInvoice($id){
+        $invoice = Invoice::findOrFail($id);
+        $invoice->tms_inv_status = 'APPROVED';
+        $invoice->save();
+
+        return response()->json([
+            'message' => 'Invoice cancelled successfully',
+            'status' => 200,
+            'invoice' => $invoice
+        ]);
+    }
+
+    public function cancelInvoice($id){
+        $invoice = Invoice::findOrFail($id);
+        $invoice->tms_inv_status = 'CANCELLED';
+        $invoice->save();
+
+        return response()->json([
+            'message' => 'Invoice cancelled successfully',
+            'status' => 200,
+            'invoice' => $invoice
         ]);
     }
 
     // Show a single invoice
     public function show($id)
     {
-        $invoice = Invoice::findOrFail($id);
+        $invoice = Invoice::with(['customer','entries'])->findOrFail($id);
         return response()->json([
             'status' => 200,
             'invoice' => $invoice
@@ -32,48 +58,37 @@ class InvoiceController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-        'inv_no'            => 'required|string|max:255',
-        'inv_date'          => 'required|date',
-        'customer_id'       => 'required|integer',
-        'inv_mode'          => 'required|string|max:255',
-        'status'            => 'required|string|max:255',
-        'total_delivery'    => 'nullable|numeric',
-        'total_loading'     => 'nullable|numeric',
-        'total_demurrage'   => 'nullable|numeric',
-        'total_night_bata'  => 'nullable|numeric',
-        'total_other'       => 'nullable|numeric',
-        'total_deductions'  => 'nullable|numeric',
-        'net_amount'        => 'nullable|numeric',
-        'entries'           => 'required|array|min:1',
-        'entries.*.shipment_id' => 'required|integer',
-        'entries.*.delivery'    => 'nullable|numeric',
-        'entries.*.loading'     => 'nullable|numeric',
-        'entries.*.demurrage'   => 'nullable|numeric',
-        'entries.*.night_bata'  => 'nullable|numeric',
-        'entries.*.other'       => 'nullable|numeric',
-        'entries.*.deductions'  => 'nullable|numeric',
-        'entries.*.total'       => 'required|numeric',
+            'inv_no'                => 'required|string|max:255',
+            'inv_date'              => 'required|date',
+            'customer_id'           => 'required|integer',
+            'inv_mode'              => 'required|string|max:255',
+            'status'                => 'string|max:255',
+            'total_delivery'        => 'nullable|numeric',
+            'total_loading'         => 'nullable|numeric',
+            'total_demurrage'       => 'nullable|numeric',
+            'total_night_bata'      => 'nullable|numeric',
+            'total_other'           => 'nullable|numeric',
+            'total_deductions'      => 'nullable|numeric',
+            'net_amount'            => 'nullable|numeric',
+            'entries'               => 'required|array|min:1',
         ]);
 
         // Create the invoice
         $invoice = Invoice::create([
-            'inv_no'            => $validated['inv_no'],
-            'inv_date'          => $validated['inv_date'],
-            'customer_id'       => $validated['customer_id'],
-            'inv_mode'          => $validated['inv_mode'],
-            'inv_type'          => $request->input('inv_type'),
-            'from_date'         => $request->input('from_date'),
-            'to_date'           => $request->input('to_date'),
-            'status'            => $validated['status'],
-            'total_delivery'    => $request->input('total_delivery'),
-            'total_loading'     => $request->input('total_loading'),
-            'total_demurrage'   => $request->input('total_demurrage'),
-            'total_night_bata'  => $request->input('total_night_bata'),
-            'total_other'       => $request->input('total_other'),
-            'total_deductions'  => $request->input('total_deductions'),
-            'net_amount'        => $request->input('net_amount'),
-            'create_datetime'   => now(),
-            'processed_datetime'=> $request->input('processed_datetime'),
+            'tms_inv_no'               => $validated['inv_no'],
+            'tms_inv_date'             => $validated['inv_date'],
+            'tms_cus_id'               => $validated['customer_id'],
+            'tms_inv_mode'             => $validated['inv_mode'],
+            'tms_inv_type'             => $request->input('inv_type'),
+            'tms_inv_status'           => $validated['status'],
+            'tms_inv_total_delivery'   => $request->input('total_delivery'),
+            'tms_inv_total_loading'    => $request->input('total_loading'),
+            'tms_inv_total_demurrage'  => $request->input('total_demurrage'),
+            'tms_inv_total_night_bata' => $request->input('total_night_bata'),
+            'tms_inv_total_other'      => $request->input('total_other'),
+            'tms_inv_total_deductions' => $request->input('total_deductions'),
+            'tms_inv_net_amount'       => $request->input('net_amount'),
+            'tms_inv_create_date'      => now(),
         ]);
 
         // Store invoice entries
@@ -88,6 +103,14 @@ class InvoiceController extends Controller
                 'tms_ien_other'         => $entry['other'] ?? 0,
                 'tms_ien_deduction'     => $entry['deductions'] ?? 0,        
             ]);
+        }
+
+        foreach ($validated['entries'] as $entry) {
+            $shipment = Shipment::find($entry['shipment_id']);
+            if ($shipment) {
+                $shipment->isInvoice = 1;
+                $shipment->save();
+            }
         }
 
         return response()->json([
@@ -172,5 +195,14 @@ class InvoiceController extends Controller
             'invoice_no' => $invoiceNo,
             'status'     => 200,
         ]);
+    }
+
+    public function printInvoice($id)
+    {
+        $invoice = Invoice::with(['customer', 'entries.shipment'])->findOrFail($id);
+        $company = CompanyModel::first(); // Adjust if you have a different way to get company details
+
+        $pdf = Pdf::loadView('invoice', compact('invoice', 'company'));
+        return $pdf->download('invoice_' . $invoice->tms_inv_no . '.pdf');
     }
 }
