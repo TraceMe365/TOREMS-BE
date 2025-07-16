@@ -26,7 +26,7 @@ class InvoiceController extends Controller
         $invoice->save();
 
         return response()->json([
-            'message' => 'Invoice cancelled successfully',
+            'message' => 'Invoice approved successfully',
             'status' => 200,
             'invoice' => $invoice
         ]);
