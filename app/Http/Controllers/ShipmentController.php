@@ -16,6 +16,7 @@ class ShipmentController extends Controller
         if ($request->has('customer_id')) {
             $query->where('tms_cus_id', $request->customer_id);
         }
+        $query->orderBy('tms_shp_request_date', 'desc');
         $shipments = $query->get();
         return response()->json([
             'status' => 200,
@@ -82,8 +83,9 @@ class ShipmentController extends Controller
             // Attach via locations if provided
             if ($request->has('via_locations') && is_array($request->via_locations)) {
                 foreach ($request['via_locations'] as $via) {
+                    $location_id = is_numeric($via['via_location']) ? $via['via_location'] : $via['id'];
                     $shipment->viaLocations()->create([
-                            'location_id'     => $via['via_location'],
+                            'location_id'     => $location_id,
                             'via_location'    => $via['via_location_name'],
                             'via_latitude'    => $via['via_latitude'],
                             'via_longitude'   => $via['via_longitude'],

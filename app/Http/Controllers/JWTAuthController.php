@@ -17,17 +17,26 @@ class JWTAuthController extends Controller
     public function register(Request $request)
     {
         $validator = Validator::make($request->all(), [
+            // User's first name: required, must be a string, max 255 chars
             'first_name' => 'required|string|max:255',
+            // User's last name: required, must be a string, max 255 chars
             'last_name'  => 'required|string|max:255',
+            // Email: required, must be a valid email, unique in users table, max 255 chars
             'email'      => 'required|string|email|max:255|unique:users',
+            // Password: required, must be a string, min 6 chars, must be confirmed
             'password'   => 'required|string|min:6|confirmed',
+            // Role: optional, must be a string, max 255 chars
             'role'       => 'nullable|string|max:255',
+            // Contact: optional, must be a string, max 255 chars
             'contact'    => 'nullable|string|max:255',
+            // NIC: optional, must be a string, max 255 chars
+            'nic' => 'nullable|string|max:255',
+            // Status: optional, must be a string
             'status'     => 'nullable|string',
         ]);
 
         if($validator->fails()){
-            return response()->json($validator->errors()->toJson(), 400);
+            return response()->json($validator->errors(), 400);
         }
 
         // Create the user first
@@ -38,17 +47,18 @@ class JWTAuthController extends Controller
             'password'   => Hash::make($request->get('password')),
             'role'       => $request->get('role'),
             'contact'    => $request->get('contact'),
-            'status'     => $request->get('status'),    
+              // 'status'     => $request->get('status'),
+            'status' => 'ACTIVE',
         ]);
-
         // Create related Customer or Employee and update user with the ID
         if ($user->role === 'customer') {
             $customer = Customer::create([
-                'cus_name' => $user->first_name . ' ' . $user->last_name,
-                'cus_con_person' => $user->first_name . ' ' . $user->last_name,
-                'cus_con_person_num' => $user->contact,
+                'cus_name'             => $user->first_name . ' ' . $user->last_name,
+                'cus_con_person'       => $user->first_name . ' ' . $user->last_name,
+                'cus_con_person_num'   => $user->contact,
                 'cus_con_person_email' => $user->email,
-                'cus_status' => 1,
+                'cus_nic'              => $request->get('nic'),
+                'cus_status'           => 1,
             ]);
             $user->customer_id = $customer->cus_id;
             $user->save();
@@ -57,6 +67,8 @@ class JWTAuthController extends Controller
                 'emp_f_name'  => $user->first_name,
                 'emp_s_name'  => $user->last_name,
                 'emp_contact' => $user->contact,
+                'emp_id_card' => $request->get('nic'),
+                'emp_type'    => 'driver',
                 'emp_status'  => 1,
             ]);
             $user->emp_id = $employee->emp_id;
@@ -64,7 +76,7 @@ class JWTAuthController extends Controller
         }
 
         return response()->json([
-            'message' => 'Succesfully created user, please await administrator approval',
+            'message' => 'Succesfully created user, please use same credentials to login',
             'user' => $user,
         ], 201);
     }

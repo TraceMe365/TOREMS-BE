@@ -23,10 +23,13 @@ Route::get('/user', [JWTAuthController::class, 'getUser']);
 Route::post('/logout', [JWTAuthController::class, 'logout']);
 
 // Quotations
+Route::post('/quotations/{id}/approve', [QuotationController::class, 'approve'])
+    ->middleware(['jwt.auth','action.logger']);
 Route::apiResource('quotations', QuotationController::class)
     ->middleware(['jwt.auth','action.logger']);
 Route::post('/quotations/{id}/approve', [QuotationController::class, 'approve'])
     ->middleware(['jwt.auth','action.logger']);
+
 
 // Vehicle Type
 Route::apiResource('vehicle-types', VehicleTypeController::class)

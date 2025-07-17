@@ -50,6 +50,20 @@ class QuotationController extends Controller
         ]);
     }
 
+    public function cancel(Request $request, $id){
+        $user = auth()->user();
+        $quotation = Quotation::findOrFail($id);
+        $quotation->status = 'APPROVED';
+        $quotation->approve_user_id = $user->id;
+        $quotation->approve_time = now();
+        $quotation->save();
+        return response()->json([
+            'message' => 'Quotation cancelled successfully',
+            'status' => 200,
+            'quotation' => $quotation
+        ]);
+    }
+
     // Store a new quotation
     public function store(Request $request)
     {
