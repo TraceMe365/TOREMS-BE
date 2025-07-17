@@ -67,12 +67,13 @@
                 <td class="right">{{ number_format($entry->tms_ien_other, 2) }}</td>
                 <td class="right">{{ number_format($entry->tms_ien_deduction, 2) }}</td>
                 <td class="right">{{ number_format(
-                    ($entry->tms_ien_delivery ?? 0) +
+               ($entry->tms_ien_delivery ?? 0) +
                     ($entry->tms_ien_loading ?? 0) +
                     ($entry->tms_ien_demurrage ?? 0) +
                     ($entry->tms_ien_night_bata ?? 0) +
                     ($entry->tms_ien_other ?? 0) -
-                    ($entry->tms_ien_deduction ?? 0), 2) }}</td>
+                    ($entry->tms_ien_deduction ?? 0), 2) }}
+                </td>
             </tr>
             @endforeach
         </tbody>
@@ -82,7 +83,15 @@
     <table>
         <tr>
             <th>Net Amount</th>
-            <td class="right" colspan="3"><strong>{{ number_format($invoice->tms_inv_total_delivery, 2) }}</strong></td>
+            <td class="right" colspan="3"><strong>{{
+                number_format(
+               ($entry->tms_ien_delivery ?? 0) +
+                    ($entry->tms_ien_loading ?? 0) +
+                    ($entry->tms_ien_demurrage ?? 0) +
+                    ($entry->tms_ien_night_bata ?? 0) +
+                    ($entry->tms_ien_other ?? 0) -
+                    ($entry->tms_ien_deduction ?? 0), 2)
+            }}</strong></td>
         </tr>
     </table>
 
