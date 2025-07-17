@@ -16,10 +16,13 @@ class ShipmentController extends Controller
         if ($request->has('customer_id')) {
             $query->where('tms_cus_id', $request->customer_id);
         }
+        else if($request->has('driver')){
+            $query->where('tms_shp_driver',$request->driver_id);
+        }
         $query->orderBy('tms_shp_request_date', 'desc');
         $shipments = $query->get();
         return response()->json([
-            'status' => 200,
+            'status'    => 200,
             'shipments' => $shipments
         ]);
     }

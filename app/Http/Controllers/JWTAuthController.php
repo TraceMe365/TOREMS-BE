@@ -52,12 +52,18 @@ class JWTAuthController extends Controller
         ]);
         // Create related Customer or Employee and update user with the ID
         if ($user->role === 'customer') {
+            // Customer Creation
+            $lastCustomer = Customer::orderBy('cus_id', 'desc')->first();
+            $nextNumber = $lastCustomer ? $lastCustomer->cus_id + 1 : 1;
+            $customerCode = 'CUST' . str_pad($nextNumber, 3, '0', STR_PAD_LEFT);
+            
             $customer = Customer::create([
                 'cus_name'             => $user->first_name . ' ' . $user->last_name,
                 'cus_con_person'       => $user->first_name . ' ' . $user->last_name,
                 'cus_con_person_num'   => $user->contact,
                 'cus_con_person_email' => $user->email,
                 'cus_nic'              => $request->get('nic'),
+                'cus_code'             => $customerCode,
                 'cus_status'           => 1,
             ]);
             $user->customer_id = $customer->cus_id;
@@ -100,6 +106,12 @@ class JWTAuthController extends Controller
             }
             // (optional) Attach the role to the token.
             $token = JWTAuth::claims(['role' => $user->role])->fromUser($user);
+            if($user->role=='customer'){
+                $customer = $user->customer;
+                if ($customer) {
+                    $user->customer = $customer;
+                }
+            }
             return response()->json(array("access_token"=>$token,"token_type"=>"Bearer","user"=>$user), 200);
         } catch (JWTException $e) {
             return response()->json(['error' => 'Could not create token'], 500);

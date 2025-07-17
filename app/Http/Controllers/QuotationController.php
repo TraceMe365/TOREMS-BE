@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Customer;
 use App\Models\Quotation;
 use App\Models\Location;
 use Illuminate\Http\Request;
@@ -69,9 +70,10 @@ class QuotationController extends Controller
     {
         try {
             $input = $request->all();
-            if (empty($input['customer_id'])) {
-                $input['customer_id'] = 1;
-            }
+            // if (empty($input['customer_id'])) {
+            //     $tempCustomer = Customer::first();
+            //     $input['customer_id'] = $tempCustomer->cus_id; 
+            // }
 
             // Store or get origin location
             $originLocation = Location::firstOrCreate([
@@ -90,7 +92,6 @@ class QuotationController extends Controller
 
             $validated = validator([
                 'customer_id'           => $input['customer_id'],
-                'quotation_no'          => $input['quotation_no'] ?? null,
                 'quotation_date'        => $input['quotation_date'] ?? null,
                 'origin_id'             => $originLocation->loc_id,
                 'destination_id'        => $destinationLocation->loc_id,
@@ -103,17 +104,16 @@ class QuotationController extends Controller
                 'status'                => $input['status'] ?? null,
             ], [
                 'customer_id'        => 'required|integer|exists:tms_customer,cus_id',
-                'quotation_no'       => 'nullable|string|max:255',
-                'quotation_date'     => 'nullable|date',
+                'quotation_date'     => 'required|date',
                 'origin_id'          => 'required|integer|exists:tms_location,loc_id',
                 'destination_id'     => 'required|integer|exists:tms_location,loc_id',
-                'vehicle_type'       => 'nullable|int',
+                'vehicle_type'       => 'required|int',
                 'rate'               => 'nullable|numeric',
                 'rate_type'          => 'nullable|string|max:255',
                 'estimated_distance' => 'nullable|numeric',
                 'estimated_time'     => 'nullable|numeric',
                 'remarks'            => 'nullable|string',
-                'status'             => 'nullable|string|max:255',
+                'status'             => 'required|string|max:255',
             ])->validate();
 
             $quotation = Quotation::create($validated);

@@ -38,11 +38,10 @@ Route::apiResource('vehicle-types', VehicleTypeController::class)
 // Shipments
 Route::get('/shipments/getRequestNo', [ShipmentController::class, 'getRequestNo'])
     ->middleware(['jwt.auth','action.logger']);
+    
 Route::post('/shipments/{id}/assign', [ShipmentController::class, 'assignVehicleDriver'])
     ->middleware(['jwt.auth','action.logger']);
 
-
-// Shipment
 Route::post('/shipments/{id}/approve', [ShipmentController::class, 'approve'])
     ->middleware(['jwt.auth','action.logger']);
 
