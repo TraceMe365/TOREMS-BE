@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Shipment;
 use App\Models\ViaLocation;
+use DB;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 
@@ -12,6 +13,7 @@ class ShipmentController extends Controller
     // List all shipments
     public function index(Request $request)
     {
+        DB::enableQueryLog(); // Enable query logging for debugging
         $query = Shipment::with(['customer', 'vehicle', 'pickupLocation', 'deliveryLocation', 'driver']);
         if ($request->has('customer_id')) {
             $query->where('tms_cus_id', $request->customer_id);
@@ -20,10 +22,12 @@ class ShipmentController extends Controller
             $query->where('tms_shp_driver',$request->driver_id);
         }
         $query->orderBy('tms_shp_request_date', 'desc');
+        
         $shipments = $query->get();
         return response()->json([
             'status'    => 200,
-            'shipments' => $shipments
+            'shipments' => $shipments,
+            'query'=>DB::getQueryLog()
         ]);
     }
     
