@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Employee;
+use App\Models\InvoiceEntry;
 use App\Models\Quotation;
 use App\Models\Shipment;
 use App\Models\Vehicle;
@@ -280,16 +281,56 @@ class ReportController extends Controller
             ]);
 
             DB::enableQueryLog();
-            $query = Shipment::with(['customer','vehicle','driver','pickupLocation','deliveryLocation'])
-                ->where('tms_cus_id', $request->customer_id)
-                ->whereBetween('tms_shp_request_date', [$request->from, $request->to])
-                ->get();
+            $data = [];
 
+            if($request->customer_id) {
+                $shipments = Shipment::with(['customer'])
+                            ->where('tms_cus_id', $request->customer_id)
+                            ->whereBetween('tms_shp_request_date', [$request->from, $request->to])
+                            ->get();
+                
+                InvoiceEntry::with(['shipment'])->whereIn('tms_ien_request_id', $shipments->pluck('tms_shp_id'))
+                    ->get()
+                    ->each(function($entry) use (&$data) {
+                        $data[] = [
+                            'shipment_id'  => $entry->shipment->tms_shp_request_no,
+                            'deliver_cost' => $entry->tms_ien_delivery,
+                            'demurrage'    => $entry->tms_ien_demurrage,
+                            'other'        => $entry->tms_ien_other,
+                            'loading'      => $entry->tms_ien_loading,
+                            'bata'         => $entry->tms_ien_night_bata,
+                            'deduction'    => $entry->tms_ien_deduction,
+                            'total' => ($entry->tms_ien_delivery + $entry->tms_ien_demurrage + $entry->tms_ien_other + $entry->tms_ien_loading + $entry->tms_ien_night_bata - $entry->tms_ien_deduction)
+                        ];
+                    });
+                
+            } else {
+                $shipments = Shipment::with(['customer'])
+                            ->whereBetween('tms_shp_request_date', [$request->from, $request->to])
+                            ->get();
+                
+                InvoiceEntry::with(['shipment'])->whereIn('tms_ien_request_id', $shipments->pluck('tms_shp_id'))
+                    ->get()
+                    ->each(function($entry) use (&$data) {
+                        $data[] = [
+                            'shipment_id'  => $entry->shipment->tms_shp_request_no,
+                            'deliver_cost' => $entry->tms_ien_delivery,
+                            'demurrage'    => $entry->tms_ien_demurrage,
+                            'other'        => $entry->tms_ien_other,
+                            'loading'      => $entry->tms_ien_loading,
+                            'bata'         => $entry->tms_ien_night_bata,
+                            'deduction'    => $entry->tms_ien_deduction,
+                            'total' => ($entry->tms_ien_delivery + $entry->tms_ien_demurrage + $entry->tms_ien_other + $entry->tms_ien_loading + $entry->tms_ien_night_bata - $entry->tms_ien_deduction)
+                        ];
+                    });
+
+            }
+            
             // Logic for generating customer report
             return response()->json([
                 'status'  => 200,
                 // 'query'   => DB::getQueryLog(),
-                'data'    => $query,
+                'data'    => $data,
                 'message' => 'Cost report generated successfully.'
             ]);
         } catch (\Throwable $th) {
