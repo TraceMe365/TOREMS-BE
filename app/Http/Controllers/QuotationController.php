@@ -10,10 +10,13 @@ use Illuminate\Http\Request;
 class QuotationController extends Controller
 {
     // List all quotations
-    public function index()
+    public function index(Request $request)
     {
-        $quotations = Quotation::with(['vehicleType', 'originLocation', 'destinationLocation'])->get();
-
+        $quotations = Quotation::with(['vehicleType', 'originLocation', 'destinationLocation']);
+        if($request->has('customer_id')) {
+            $quotations = $quotations->where('customer_id', $request->input('customer_id'));
+        }
+        $quotations = $quotations->get();
         return response()->json([
             'status' => 200,
             'quotations' => $quotations
