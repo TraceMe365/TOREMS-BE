@@ -93,7 +93,7 @@ class ShipmentController extends Controller
                     $location_id = is_numeric($via['via_location']) ? $via['via_location'] : $via['id'];
                     $shipment->viaLocations()->create([
                             'location_id'     => $location_id,
-                            'via_location'    => $via['via_location_name'],
+                            'via_location'    => $via['via_location'],
                             'via_latitude'    => $via['via_latitude'],
                             'via_longitude'   => $via['via_longitude'],
                             'tms_shipment_id' => $shipment->id,

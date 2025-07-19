@@ -133,5 +133,20 @@ Route::apiResource('invoice', InvoiceController::class)
     ->middleware(['jwt.auth','action.logger']);
 
 
+Route::post('/report/customer-report', [ReportController::class, 'customerReport'])
+    ->middleware(['jwt.auth','action.logger']);
+
+Route::post('/report/shipment-report', [ReportController::class, 'shipmentReport'])
+    ->middleware(['jwt.auth','action.logger']);
+
+Route::post('/report/driver-report', [ReportController::class, 'driverReport'])
+    ->middleware(['jwt.auth','action.logger']);
+
+Route::post('/report/mileage-report', [ReportController::class, 'mileageReport'])
+    ->middleware(['jwt.auth','action.logger']);
+
+Route::post('/report/cost-report', [ReportController::class, 'costReport'])
+    ->middleware(['jwt.auth','action.logger']);
+
 // TEST EMAIL 
 Route::get('/test-email', [ReportController::class, 'sendtestmail']);
