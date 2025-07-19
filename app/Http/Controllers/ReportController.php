@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Employee;
 use App\Models\Quotation;
 use App\Models\Shipment;
+use App\Models\Vehicle;
 use DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
@@ -205,22 +206,58 @@ class ReportController extends Controller
     {
         try {
             $request->validate([
-                'customer_id' => 'nullable|integer',
-                'from'        => 'required|date',
-                'to'          => 'required|date|after_or_equal:start_date',
+                'vehicle_id' => 'nullable|integer',
+                'from'      => 'required|date',
+                'to'        => 'required|date|after_or_equal:start_date',
             ]);
 
             DB::enableQueryLog();
-            $query = Shipment::with(['customer','vehicle','driver','pickupLocation','deliveryLocation'])
-                ->where('tms_cus_id', $request->customer_id)
-                ->whereBetween('tms_shp_request_date', [$request->from, $request->to])
-                ->get();
+
+            $data = [];
+
+            if ($request->vehicle_id) {
+                // Single vehicle
+                $vehicle = Vehicle::with(['vehicle_type'])->findOrFail($request->vehicle_id);
+                $shipments = Shipment::with(['customer', 'driver', 'pickupLocation', 'deliveryLocation'])
+                    ->where('tms_veh_id', $vehicle->veh_id)
+                    ->whereBetween('tms_shp_request_date', [$request->from, $request->to])
+                    ->get();
+
+                $totalMileage = $shipments->sum('tms_shp_estimated_mileage');
+
+                $data = [
+                    'vehicle_id'      => $vehicle->veh_id,
+                    'vehicle_no'      => $vehicle->veh_no,
+                    'total_mileage'   => $totalMileage,
+                    'shipments'       => $shipments->pluck('tms_shp_request_no'),
+                    'total_shipments' => $shipments->count(),
+                ];
+            } else {
+                // All vehicles
+                $vehicles = Vehicle::with(['vehicle_type'])->get();
+                foreach ($vehicles as $vehicle) {
+                    $shipments = Shipment::with(['customer', 'driver', 'pickupLocation', 'deliveryLocation'])
+                        ->where('tms_veh_id', $vehicle->veh_id)
+                        ->whereBetween('tms_shp_request_date', [$request->from, $request->to])
+                        ->get();
+
+                    $totalMileage = $shipments->sum('tms_shp_estimated_mileage');
+
+                    $data[] = [
+                        'vehicle_id'      => $vehicle->veh_id,
+                        'vehicle_no'      => $vehicle->veh_no,
+                        'total_mileage'   => $totalMileage,
+                        'shipments'       => $shipments->pluck('tms_shp_request_no'),
+                        'total_shipments' => $shipments->count(),
+                    ];
+                }
+            }
 
             // Logic for generating customer report
             return response()->json([
                 'status'  => 200,
                 // 'query'   => DB::getQueryLog(),
-                'data'    => $query,
+                'data'    => $data,
                 'message' => 'Mileage report generated successfully.'
             ]);
         } catch (\Throwable $th) {
