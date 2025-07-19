@@ -76,25 +76,27 @@ class QuotationController extends Controller
             // }
 
             // Store or get origin location
-            $originLocation = Location::firstOrCreate([
-                'loc_name' => $input['origin'],
-                'loc_lat'  => $input['origin_latitude'],
-                'loc_long' => $input['origin_longitude'],
-                'cus_id'   => $input['customer_id'] ?? null,
-            ]);
-            // Store or get destination location
-            $destinationLocation = Location::firstOrCreate([
-                'loc_name' => $input['destination'],
-                'loc_lat'  => $input['destination_latitude'],
-                'loc_long' => $input['destination_longitude'],
-                'cus_id'   => $input['customer_id'] ?? null,
-            ]);
+            // $originLocation = Location::firstOrCreate([
+            //     'loc_name' => $input['origin'],
+            //     'loc_lat'  => $input['origin_latitude'],
+            //     'loc_long' => $input['origin_longitude'],
+            //     'cus_id'   => $input['customer_id'] ?? null,
+            // ]);
+            // // Store or get destination location
+            // $destinationLocation = Location::firstOrCreate([
+            //     'loc_name' => $input['destination'],
+            //     'loc_lat'  => $input['destination_latitude'],
+            //     'loc_long' => $input['destination_longitude'],
+            //     'cus_id'   => $input['customer_id'] ?? null,
+            // ]);
+
+            
 
             $validated = validator([
                 'customer_id'           => $input['customer_id'],
                 'quotation_date'        => $input['quotation_date'] ?? null,
-                'origin_id'             => $originLocation->loc_id,
-                'destination_id'        => $destinationLocation->loc_id,
+                'origin_id'             => $input['origin'],
+                'destination_id'        => $input['destination'],
                 'vehicle_type'          => $input['vehicle_type'] ?? null,
                 'rate'                  => $input['rate'] ?? null,
                 'rate_type'             => $input['rate_type'] ?? null,
@@ -123,17 +125,17 @@ class QuotationController extends Controller
             // Add via locations (store location and link via_locations)
             if (isset($input['via_locations']) && is_array($input['via_locations'])) {
                 foreach ($input['via_locations'] as $via) {
-                    $viaLocation = Location::firstOrCreate([
-                        'loc_name' => $via['name'],
-                        'loc_lat'  => $via['lat'],
-                        'loc_long' => $via['lng'],
-                        'cus_id'   => $input['customer_id'] ?? null,
-                    ]);
+                    // $viaLocation = Location::firstOrCreate([
+                    //     'loc_name' => $via['name'],
+                    //     'loc_lat'  => $via['lat'],
+                    //     'loc_long' => $via['lng'],
+                    //     'cus_id'   => $input['customer_id'] ?? null,
+                    // ]);
                     $quotation->viaLocations()->create([
-                        'location_id'      => $viaLocation->loc_id,
-                        'via_location'     => $via['name'],
-                        'via_latitude'     => $via['lat'],
-                        'via_longitude'    => $via['lng'],
+                        'location_id'      => $via['via_location_id'],
+                        'via_location'     => $via['via_location'],
+                        'via_latitude'     => $via['via_latitude'],
+                        'via_longitude'    => $via['via_longitude'],
                         'tms_quotation_id' => $quotation->id,
                     ]);
                 }
@@ -171,27 +173,12 @@ class QuotationController extends Controller
             $quotation = Quotation::findOrFail($id);
             $input = $request->all();
 
-            // Update or get origin location
-            $originLocation = Location::firstOrCreate([
-                'loc_name' => $input['origin'],
-                'loc_lat'  => $input['origin_latitude'],
-                'loc_long' => $input['origin_longitude'],
-                'cus_id'   => $input['customer_id'] ?? null,
-            ]);
-            // Update or get destination location
-            $destinationLocation = Location::firstOrCreate([
-                'loc_name' => $input['destination'],
-                'loc_lat'  => $input['destination_latitude'],
-                'loc_long' => $input['destination_longitude'],
-                'cus_id'   => $input['customer_id'] ?? null,
-            ]);
-
             $validated = validator([
                 'customer_id'           => $input['customer_id'],
                 'quotation_no'          => $input['quotation_no'] ?? null,
                 'quotation_date'        => $input['quotation_date'] ?? null,
-                'origin_id'             => $originLocation->loc_id,
-                'destination_id'        => $destinationLocation->loc_id,
+                'origin_id'             => $input['origin_location']['loc_id'],
+                'destination_id'        => $input['destination_location']['loc_id'],
                 'vehicle_type'          => $input['vehicle_type'] ?? null,
                 'rate'                  => $input['rate'] ?? null,
                 'rate_type'             => $input['rate_type'] ?? null,
@@ -223,17 +210,18 @@ class QuotationController extends Controller
 
                 // Add new via locations
                 foreach ($input['via_locations'] as $via) {
-                    $viaLocation = Location::firstOrCreate([
-                        'loc_name' => $via['name'],
-                        'loc_lat'  => $via['lat'],
-                        'loc_long' => $via['lng'],
-                        'cus_id'   => $input['customer_id'] ?? null,
-                    ]);
+                    // $viaLocation = Location::firstOrCreate([
+                    //     'loc_name' => $via['name'],
+                    //     'loc_lat'  => $via['lat'],
+                    //     'loc_long' => $via['lng'],
+                    //     'cus_id'   => $input['customer_id'] ?? null,
+                    // ]);
+
                     $quotation->viaLocations()->create([
-                        'location_id'      => $viaLocation->loc_id,
-                        'via_location'     => $via['name'],
-                        'via_latitude'     => $via['lat'],
-                        'via_longitude'    => $via['lng'],
+                        'location_id'      => $via['via_location_id'],
+                        'via_location'     => $via['via_location'],
+                        'via_latitude'     => $via['via_latitude'],
+                        'via_longitude'    => $via['via_longitude'],
                         'tms_quotation_id' => $quotation->id,
                     ]);
                 }
