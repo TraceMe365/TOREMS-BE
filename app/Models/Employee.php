@@ -3,9 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Employee extends Model
 {
+    use SoftDeletes;
+    
     protected $table = 'tms_employee';
     protected $primaryKey = 'emp_id';
 
@@ -41,4 +44,25 @@ class Employee extends Model
         'emp_password',
         'emp_grama_expiry',
     ];
+
+    protected $dates = ['deleted_at'];
+
+    // // Soft delete an employee
+    // $employee = Employee::find(1);
+    // $employee->delete(); // Sets deleted_at timestamp
+
+    // // Get only non-deleted employees (default behavior)
+    // $employees = Employee::all();
+
+    // // Get only soft-deleted employees
+    // $deletedEmployees = Employee::onlyTrashed()->get();
+
+    // // Get all employees including soft-deleted
+    // $allEmployees = Employee::withTrashed()->get();
+
+    // // Permanently delete
+    // $employee->forceDelete();
+
+    // // Restore soft-deleted employee
+    // $employee->restore();
 }
