@@ -3,6 +3,7 @@
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\ConfigController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\JWTAuthController;
@@ -132,7 +133,7 @@ Route::post('/invoice/{id}/paid', [InvoiceController::class, 'paid'])
 Route::apiResource('invoice', InvoiceController::class)
     ->middleware(['jwt.auth','action.logger']);
 
-
+// Reports
 Route::post('/report/customer-report', [ReportController::class, 'customerReport'])
     ->middleware(['jwt.auth','action.logger']);
 
@@ -146,6 +147,10 @@ Route::post('/report/mileage-report', [ReportController::class, 'mileageReport']
     ->middleware(['jwt.auth','action.logger']);
 
 Route::post('/report/cost-report', [ReportController::class, 'costReport'])
+    ->middleware(['jwt.auth','action.logger']);
+
+// Dashboard
+Route::get('/dashboard/admin', [DashboardController::class, 'dashboardAdmin'])
     ->middleware(['jwt.auth','action.logger']);
 
 // TEST EMAIL 
