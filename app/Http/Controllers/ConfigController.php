@@ -55,4 +55,14 @@ class ConfigController extends Controller
         // Return the file as a download response
         return response()->download($storagePath)->deleteFileAfterSend(true);
     }
+
+    public function getActionLogs(Request $request)
+    {
+        $logs = \App\Models\ActionLog::with('user')
+            ->orderBy('created_at', 'desc')
+            ->paginate(10);
+
+        // Return the logs as a JSON response
+        return response()->json($logs);
+    }
 }

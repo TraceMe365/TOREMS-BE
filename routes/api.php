@@ -157,5 +157,8 @@ Route::get('/dashboard/employee', [DashboardController::class, 'dashboardEmploye
 Route::get('/dashboard/customer', [DashboardController::class, 'dashboardCustomer'])
     ->middleware(['jwt.auth','action.logger']);
 
+// Log
+Route::get('/logs', [ConfigController::class, 'getActionLogs'])
+    ->middleware(['jwt.auth','action.logger']); 
 // TEST EMAIL 
 Route::get('/test-email', [ReportController::class, 'sendtestmail']);

@@ -251,4 +251,16 @@ class InvoiceController extends Controller
             ], 500);
         }
     }
+
+    public function paid($id){
+        $invoice = Invoice::findOrFail($id);
+        $invoice->tms_inv_status = 'PAID';
+        $invoice->save();
+
+        return response()->json([
+            'message' => 'Invoice marked as paid successfully',
+            'status' => 200,
+            'invoice' => $invoice
+        ]);
+    }
 }

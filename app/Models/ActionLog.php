@@ -13,4 +13,9 @@ class ActionLog extends Model
         'user_id',
         'details',
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }
