@@ -24,7 +24,7 @@ return new class extends Migration
             $table->string('loc_address')->nullable();
             $table->text('loc_other')->nullable();
             $table->string('loc_type')->nullable();
-            $table->boolean('loc_status')->default(1);
+            $table->string('loc_status')->default(1);
             $table->decimal('loc_turn_around_time', 8, 2)->nullable();
             $table->decimal('loc_lat', 11, 8)->nullable();
             $table->decimal('loc_long', 11, 8)->nullable();

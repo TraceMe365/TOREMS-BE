@@ -21,12 +21,19 @@ class LocationController extends Controller
     {
         try {
             $validated = $request->validate([
-                'loc_name' => 'required|string|max:255',
-                'loc_lat'  => 'nullable|numeric',
-                'loc_long' => 'nullable|numeric',
-                'cus_id'   => 'nullable|integer',
+                'loc_name'           => 'required|string|max:255|unique:tms_location,loc_name',
+                'loc_lat'            => 'required|numeric',
+                'loc_long'           => 'required|numeric',
+                'cus_id'             => 'nullable|integer',
+                'loc_contact_person' => 'required|string',
+                'loc_contact_mobile' => 'required|string',
+                'loc_status'         => 'required|string',
+                'loc_address'        => 'nullable|string',
             ]);
-
+            
+            $locationCode            = 'LOC' . str_pad(Location::count() + 1, 3, '0', STR_PAD_LEFT);
+            $validated['created_by'] = auth()->id();
+            $validated['loc_code']   = $locationCode;
             $location = Location::create($validated);
 
             return response()->json([
@@ -60,10 +67,14 @@ class LocationController extends Controller
             $location = Location::findOrFail($id);
 
             $validated = $request->validate([
-                'loc_name' => 'sometimes|string|max:255',
-                'loc_lat'  => 'nullable|numeric',
-                'loc_long' => 'nullable|numeric',
-                'cus_id'   => 'nullable|integer',
+                'loc_name'           => 'sometimes|string|max:255',
+                'loc_lat'            => 'required|numeric',
+                'loc_long'           => 'required|numeric',
+                'cus_id'             => 'nullable|integer',
+                'loc_contact_person' => 'required|string',
+                'loc_contact_mobile' => 'required|string',
+                'loc_status'         => 'required|string',
+                'loc_address'        => 'nullable|string',
             ]);
 
             $location->update($validated);

@@ -26,6 +26,14 @@ class UserController extends Controller
         ]);
     }
 
+    public function store(Request $request){
+        
+        return response()->json([
+            'status' => 200,
+            'user' => $request->all()
+        ]);
+    }
+
     // Update a user
     public function update(Request $request, $id)
     {

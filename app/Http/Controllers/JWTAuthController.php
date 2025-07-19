@@ -104,6 +104,9 @@ class JWTAuthController extends Controller
             if ($user->status == 'REJECTED' || $user->status === 'rejected') {
                 return response()->json(['error' => 'Registration rejected'], 403);
             }
+            if ($user->status == 'INACTIVE') {
+                return response()->json(['error' => 'User account is disabled'], 403);
+            }
             // (optional) Attach the role to the token.
             $token = JWTAuth::claims(['role' => $user->role])->fromUser($user);
             if($user->role=='customer'){
