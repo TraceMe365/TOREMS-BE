@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::table('tms_trip_invoice', function (Blueprint $table) {
             $table->string('tms_inv_proof')->nullable();
+            $table->datetime('tms_inv_proof_time')->nullable();
         });
     }
 
@@ -22,7 +23,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('tms_trip_invoice', function (Blueprint $table) {
-            $table->dropColumn('tms_inv_proof');
+            $table->dropColumn(['tms_inv_proof','tms_inv_proof_time']);
         });
     }
 };

@@ -223,6 +223,7 @@ class InvoiceController extends Controller
                 $imagePath = $file->storeAs('invoices', $imageName, 'public');
                 
                 $invoice->tms_inv_proof = 'storage/'.$imagePath;
+                $invoice->tms_inv_proof_time = now();
                 $invoice->save();
                 
                 return response()->json([

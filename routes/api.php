@@ -126,6 +126,9 @@ Route::get('/invoice/{id}/print', [InvoiceController::class, 'printInvoice'])
 Route::post('/invoice/{id}/upload-proof', [InvoiceController::class, 'uploadProof'])
     ->middleware(['jwt.auth','action.logger']);
 
+Route::post('/invoice/{id}/paid', [InvoiceController::class, 'paid'])
+    ->middleware(['jwt.auth','action.logger']);
+
 Route::apiResource('invoice', InvoiceController::class)
     ->middleware(['jwt.auth','action.logger']);
 
