@@ -19,16 +19,29 @@ class VehicleController extends Controller
     // Store a new vehicle
     public function store(Request $request)
     {
+        $user = auth()->user();
         try {
             $validated = $request->validate([
-                'veh_no'               => 'required|string|max:255',
+                'veh_no'           => 'required|string|max:255',
                 'vehicle_type'         => 'required|integer',
-                'veh_loading_capacity' => 'required|numeric',
-                'veh_status'           => 'required|integer',
-                'veh_availability'     => 'required|integer',
-                'veh_diver_id'         => 'nullable|integer',
-                'created_by'           => 'nullable|integer',
+                'vehicle_status'       => 'required|integer',
+                'veh_loading_capacity' => 'required|integer',
+                'veh_image_link'       => 'nullable|image|mimes:jpeg,png,jpg,gif,svg',
             ]);
+
+            $validated['created_by']       = $user->id;
+            $validated['veh_availability'] = 1;
+            $validated['veh_gps_status']   = 0;
+            $validated['veh_permanent']    = 0;
+            $validated['veh_diver_id']     = 9;
+            $validated['veh_is_available'] = 1;
+
+            if ($request->hasFile('veh_image_link')) {
+                $image = $request->file('veh_image_link');
+                $imageName = uniqid('user_', true) . '.' . $image->getClientOriginalExtension();
+                $imagePath = $image->storeAs('vehicle_images', $imageName, 'public');
+                $validated['veh_image_link'] = 'storage/' . $imagePath;
+            }
 
             $vehicle = Vehicle::create($validated);
 
