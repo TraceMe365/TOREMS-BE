@@ -12,7 +12,7 @@ class VehicleController extends Controller
     {
         return response()->json([
             'status' => 200,
-            'vehicles' => Vehicle::all()
+            'vehicles' => Vehicle::with(['vehicle_type'])->get()
         ]);
     }
 
