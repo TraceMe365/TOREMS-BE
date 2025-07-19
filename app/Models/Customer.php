@@ -28,4 +28,9 @@ class Customer extends Model
         'cus_vat_number',
         'cus_nbt_number',
     ];
+
+    public function user()
+    {
+        return $this->hasOne(User::class, 'customer_id', 'cus_id');
+    }
 }

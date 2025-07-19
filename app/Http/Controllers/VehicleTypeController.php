@@ -20,14 +20,14 @@ class VehicleTypeController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'veh_type' => 'required|string|max:255',
+            'veh_type'               => 'required|string|max:255',
             'veh_type_specification' => 'nullable|string|max:255',
-            'veh_efficiency' => 'nullable|numeric',
-            'veh_type_status' => 'nullable|integer',
-            'created_by' => 'nullable|integer',
-            'tms_com_id' => 'nullable|integer',
-            'tms_cus_id' => 'nullable|integer',
-            'veh_capacity' => 'nullable|numeric',
+            'veh_efficiency'         => 'nullable|numeric',
+            'veh_type_status'        => 'nullable|integer',
+            'created_by'             => 'nullable|integer',
+            'tms_com_id'             => 'nullable|integer',
+            'tms_cus_id'             => 'nullable|integer',
+            'veh_capacity'           => 'nullable|numeric',
         ]);
 
         $vehicleType = VehicleType::create($validated);

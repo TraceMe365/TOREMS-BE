@@ -55,7 +55,7 @@ class EmployeeController extends Controller
     // Show a single employee
     public function show($id)
     {
-        $employee = Employee::findOrFail($id);
+        $employee = Employee::with(['user'])->findOrFail($id);
         return response()->json([
             'status' => 200,
             'employee' => $employee
@@ -75,7 +75,6 @@ class EmployeeController extends Controller
                 'emp_type'     => 'nullable|string|max:255',
                 'emp_status'   => 'nullable|integer',
                 'emp_address'  => 'nullable|string|max:255',
-                'created_by'   => 'nullable|integer',
             ]);
 
             $employee->update($validated);

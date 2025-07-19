@@ -13,9 +13,9 @@ class CustomerController extends Controller
         $user = auth()->user();
         $customers = [];
         if ($user->role === 'admin') {
-            $customers = Customer::all();
+            $customers = Customer::with(['user'])->get();
         } else if($user->role === 'customer') {
-            $customers = Customer::where('cus_id', $user->customer_id)->get();
+            $customers = Customer::with(['user'])->where('cus_id', $user->customer_id)->get();
         }
         return response()->json([
             'status' => 200,

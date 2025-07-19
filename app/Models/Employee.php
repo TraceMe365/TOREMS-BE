@@ -47,6 +47,11 @@ class Employee extends Model
 
     protected $dates = ['deleted_at'];
 
+    public function user()
+    {
+        return $this->hasOne(User::class, 'emp_id', 'emp_id');
+    }
+
     // // Soft delete an employee
     // $employee = Employee::find(1);
     // $employee->delete(); // Sets deleted_at timestamp
