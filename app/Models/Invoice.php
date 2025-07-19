@@ -28,6 +28,7 @@ class Invoice extends Model
         'tms_inv_create_date',
         'tms_inv_processed_user',
         'tms_inv_processed_date',
+        'tms_inv_proof'
     ];
 
     public function customer()

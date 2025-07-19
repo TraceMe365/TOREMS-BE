@@ -205,4 +205,49 @@ class InvoiceController extends Controller
         $pdf = Pdf::loadView('invoice', compact('invoice', 'company'));
         return $pdf->download('invoice_' . $invoice->tms_inv_no . '.pdf');
     }
+
+    public function uploadProof($id){
+        try {
+            $invoice = Invoice::findOrFail($id);
+            
+            // Validate the request
+            $request = request();
+            $request->validate([
+                'proof' => 'required|file|mimes:jpeg,jpg,png,pdf'
+            ]);
+            
+            $file = $request->file('proof');
+
+            if ($file) {
+                $imageName = uniqid('invoice_proof_', true) . '.' . $file->getClientOriginalExtension();
+                $imagePath = $file->storeAs('invoices', $imageName, 'public');
+                
+                $invoice->tms_inv_proof = 'storage/'.$imagePath;
+                $invoice->save();
+                
+                return response()->json([
+                    'message' => 'Proof uploaded successfully',
+                    'status' => 200,
+                    'proof_path' => $imagePath
+                ]);
+            }
+            
+            return response()->json([
+                'message' => 'No file uploaded',
+                'status' => 400
+            ], 400);
+            
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'message' => 'Validation failed',
+                'errors' => $e->errors(),
+                'status' => 422
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Upload failed: ' . $e->getMessage(),
+                'status' => 500
+            ], 500);
+        }
+    }
 }

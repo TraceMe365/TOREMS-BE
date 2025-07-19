@@ -123,8 +123,12 @@ Route::get('/invoices/generate-invoice-no', [InvoiceController::class, 'generate
 Route::get('/invoice/{id}/print', [InvoiceController::class, 'printInvoice'])
     ->middleware(['jwt.auth','action.logger']);
 
+Route::post('/invoice/{id}/upload-proof', [InvoiceController::class, 'uploadProof'])
+    ->middleware(['jwt.auth','action.logger']);
+
 Route::apiResource('invoice', InvoiceController::class)
     ->middleware(['jwt.auth','action.logger']);
+
 
 // TEST EMAIL 
 Route::get('/test-email', [ReportController::class, 'sendtestmail']);
