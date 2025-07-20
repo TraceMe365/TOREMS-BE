@@ -96,16 +96,16 @@
                 <tr>
                     <td>1</td>
                     <td>{{ $shipment->pickupLocation->loc_name ?? '' }}</td>
-                    <td>{{ $shipment->pickupLocation->contact_person ?? '' }}</td>
-                    <td>{{ $shipment->pickupLocation->contact ?? '' }}</td>
+                    <td>{{ $shipment->pickupLocation->loc_contact_person ?? '' }}</td>
+                    <td>{{ $shipment->pickupLocation->loc_contact_mobile ?? '' }}</td>
                     <td>{{ $shipment->tms_shp_arrived_pickup ?? '' }}</td>
                     <td>{{ $shipment->tms_shp_departed_pickup ?? '' }}</td>
                 </tr>
                 <tr>
                     <td>2</td>
                     <td>{{ $shipment->deliveryLocation->loc_name ?? '' }}</td>
-                    <td>{{ $shipment->deliveryLocation->contact_person ?? '' }}</td>
-                    <td>{{ $shipment->deliveryLocation->contact ?? '' }}</td>
+                    <td>{{ $shipment->deliveryLocation->loc_contact_person ?? '' }}</td>
+                    <td>{{ $shipment->deliveryLocation->loc_contact_mobile ?? '' }}</td>
                     <td>{{ $shipment->tms_shp_arrived_delivery ?? '' }}</td>
                     <td>{{ $shipment->tms_shp_departed_delivery ?? '' }}</td>
                 </tr>

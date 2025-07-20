@@ -12,12 +12,23 @@ use App\Models\CompanyModel; // Adjust if your company model is named differentl
 class InvoiceController extends Controller
 {
     // List all invoices
-    public function index()
-    {
-        return response()->json([
-            'status' => 200,
-            'invoices' => Invoice::with(['customer'])->get()
-        ]);
+    public function index(Request $request)
+    {   
+        if($request->has('customer_id')){
+            $customerId = $request->input('customer_id');
+            return response()->json([
+                'status' => 200,
+                'invoices' => Invoice::with(['customer'])
+                    ->where('tms_cus_id', $customerId)
+                    ->get()
+            ]);
+        }
+        else{
+            return response()->json([
+                'status' => 200,
+                'invoices' => Invoice::with(['customer'])->get()
+            ]);
+        }
     }
 
     public function approveInvoice($id){
@@ -190,7 +201,8 @@ class InvoiceController extends Controller
         $lastInvoice = Invoice::orderBy('tms_inv_id', 'desc')->first();
         $lastId = $lastInvoice ? $lastInvoice->id : 0;
         $nextId = $lastId + 1;
-        $invoiceNo = 'INV-' . str_pad($nextId, 6, '0', STR_PAD_LEFT);
+        $invoiceLast = (Invoice::count())+1;
+        $invoiceNo = 'INV-' . str_pad($invoiceLast, 6, '0', STR_PAD_LEFT);
         return response()->json([
             'invoice_no' => $invoiceNo,
             'status'     => 200,

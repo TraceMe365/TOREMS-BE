@@ -21,7 +21,7 @@ class ShipmentController extends Controller
         else if($request->has('driver_id')){
             $query->where('tms_shp_driver',$request->driver_id);
         }
-        $query->orderBy('tms_shp_request_date', 'desc');
+        $query->orderBy('created_at', 'desc');
         
         $shipments = $query->get();
         return response()->json([
@@ -389,7 +389,7 @@ class ShipmentController extends Controller
             'vehicle.vehicle_type',
             'pickupLocation',
             'deliveryLocation',
-            'driver'
+            'driver',
         ])->findOrFail($id);
         $company = \App\Models\CompanyModel::first();
         
