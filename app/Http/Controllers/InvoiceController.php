@@ -198,9 +198,9 @@ class InvoiceController extends Controller
     }
 
     public function generateInvoiceNumber(){
-        $lastInvoice = Invoice::orderBy('tms_inv_id', 'desc')->first();
-        $lastId = $lastInvoice ? $lastInvoice->id : 0;
-        $nextId = $lastId + 1;
+        // $lastInvoice = Invoice::orderBy('tms_inv_id', 'desc')->first();
+        // $lastId = $lastInvoice ? $lastInvoice->id : 0;
+        // $nextId = $lastId + 1;
         $invoiceLast = (Invoice::count())+1;
         $invoiceNo = 'INV-' . str_pad($invoiceLast, 6, '0', STR_PAD_LEFT);
         return response()->json([
